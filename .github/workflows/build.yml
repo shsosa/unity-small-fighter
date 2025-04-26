@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         unityVersion:
-          - 2022.3.8f1
+          - 6000.0.23f1
         targetPlatform:
           - WebGL
           - StandaloneLinux64
@@ -28,13 +28,13 @@ jobs:
 
       # Checkout
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           lfs: true
           path: .
     
       # Cache
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: Library
           key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
@@ -43,9 +43,11 @@ jobs:
 
       # Build
       - name: Build project
-        uses: game-ci/unity-builder@v3
+        uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
@@ -57,7 +59,7 @@ jobs:
           folder: build/${{ matrix.targetPlatform }}/WebGL # The folder the action should deploy.
 
       - name: Deploy Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Build-${{ matrix.targetPlatform }}
           path: build/${{ matrix.targetPlatform }}
@@ -68,7 +70,7 @@ jobs:
           mkdir -p ${{ matrix.targetPlatform }}
 
       - name: Download Artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: Build-${{ matrix.targetPlatform }}
           path: ${{ matrix.targetPlatform }}
@@ -79,7 +81,7 @@ jobs:
           zip -r ${{ matrix.targetPlatform }}.zip ${{ matrix.targetPlatform }}
 
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           # Identify if this is a pre release by checking if the tag name contains -rc, -b, -a
