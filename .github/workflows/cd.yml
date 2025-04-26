@@ -51,6 +51,7 @@ jobs:
         with:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
+          buildOptions: Development
 
       - if: matrix.targetPlatform == 'WebGL'
         name: Deploy Pages 🚀
