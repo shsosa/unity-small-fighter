@@ -1,4 +1,4 @@
-name: Build
+name: CD
 
 on:
  push:
@@ -7,7 +7,6 @@ on:
  workflow_dispatch:
    branches:
      - main
-  
   
 jobs:
   build:
@@ -23,6 +22,7 @@ jobs:
           - WebGL
           - StandaloneLinux64
           - StandaloneWindows
+          - StandaloneWindows64
           - StandaloneOSX
     steps:
 
