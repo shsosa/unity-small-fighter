@@ -13,7 +13,20 @@ public class SettingsMenu : MonoBehaviour
 
     public void LoadSettings()
     {
+
+	if (Application.platform == RuntimePlatform.WebGLPlayer)
+    {
+		resolutions = new Resolution[]
+        {
+            new Resolution { width = 960, height = 540 },
+            new Resolution { width = 1280, height = 720 },
+            new Resolution { width = 1920, height = 1080 }
+        };
+    }
+    else
+    {
         resolutions = Screen.resolutions.Select(resolution => new Resolution { width = resolution.width, height = resolution.height }).Distinct().ToArray();
+    }
         resolutionsDropdown.ClearOptions();
 
         List<string> resolutionStrings = new List<string>();
