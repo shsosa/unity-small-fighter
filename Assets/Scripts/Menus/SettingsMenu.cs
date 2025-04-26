@@ -39,7 +39,14 @@ public class SettingsMenu : MonoBehaviour
         if (PlayerPrefs.HasKey("Resolution"))
         {
             int index = PlayerPrefs.GetInt("Resolution");
-            OnChangeResolution(index);
+            if (index >= 0 && index < resolutions.Length)
+            {
+                OnChangeResolution(index);
+            }
+            else
+            {
+                OnChangeResolution(currentResolutionIndex);
+            }
         }
         else if (targetResolutionIndex != 0)
         {
@@ -66,6 +73,9 @@ public class SettingsMenu : MonoBehaviour
 
     public void OnChangeResolution(int resolution)
     {
+        if (resolution < 0 || resolution >= resolutions.Length)
+            return;
+
         Screen.SetResolution(resolutions[resolution].width, resolutions[resolution].height, Screen.fullScreenMode);
         PlayerPrefs.SetInt("Resolution", resolution);
         resolutionsDropdown.value = resolution;
