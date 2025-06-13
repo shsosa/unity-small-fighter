@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 1f999a735a2372a499ce9ee264868762
+timeCreated: 1453391730
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Materials/CityMaterials/02 - Default.mat
+  uploadId: 368715

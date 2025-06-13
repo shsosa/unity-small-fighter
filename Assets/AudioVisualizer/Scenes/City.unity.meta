@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: de7c70d01d7ac3849980df905ebfa6be
+timeCreated: 1453329978
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Scenes/City.unity
+  uploadId: 368715

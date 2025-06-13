@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 9fc54f8de333165439601f1b4de7b092
+timeCreated: 1480616349
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Scenes/RecordAudio.unity
+  uploadId: 368715

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 77c56239a625471419ae87867e28b06b
+timeCreated: 1480875840
+licenseType: Store
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Resources/CelestialVisitor.txt
+  uploadId: 368715

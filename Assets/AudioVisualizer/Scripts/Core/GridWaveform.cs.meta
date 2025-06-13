@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: b9d1b9114197edf41903ca02982f785e
+timeCreated: 1522005089
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Scripts/Core/GridWaveform.cs
+  uploadId: 368715

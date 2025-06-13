@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a0fac1406bc4fa24baee9adabe8a4c6c
+timeCreated: 1453834183
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Scenes/Sphere.unity
+  uploadId: 368715

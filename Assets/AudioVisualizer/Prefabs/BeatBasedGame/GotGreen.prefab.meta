@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: bdc9b090d7be58d43a06dac334f56682
+timeCreated: 1481064031
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Prefabs/BeatBasedGame/GotGreen.prefab
+  uploadId: 368715

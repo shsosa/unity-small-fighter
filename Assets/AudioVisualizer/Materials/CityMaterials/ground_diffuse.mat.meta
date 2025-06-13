@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 1a47c5ebeff8c1340ba4d1f179eadf8e
+timeCreated: 1453391729
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Materials/CityMaterials/ground_diffuse.mat
+  uploadId: 368715

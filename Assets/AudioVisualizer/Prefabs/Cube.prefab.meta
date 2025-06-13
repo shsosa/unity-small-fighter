@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: b600f298b9a18a84084dedf8d572b10c
+timeCreated: 1522005857
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Prefabs/Cube.prefab
+  uploadId: 368715

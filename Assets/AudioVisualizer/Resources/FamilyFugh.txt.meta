@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 8b16ac50e78952f488932f04e5ca1b4b
+timeCreated: 1480876281
+licenseType: Store
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Resources/FamilyFugh.txt
+  uploadId: 368715

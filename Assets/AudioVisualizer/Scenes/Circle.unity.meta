@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6ce84758aa87017469cc5bde1eaa5bb8
+timeCreated: 1443483115
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Scenes/Circle.unity
+  uploadId: 368715

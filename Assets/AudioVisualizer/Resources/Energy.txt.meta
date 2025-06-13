@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ffcd6f0382db740428b4a53ca9fddd0b
+timeCreated: 1482947267
+licenseType: Store
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Resources/Energy.txt
+  uploadId: 368715

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 0a50d79faf3ddb94ebd89e2b950ed34f
+timeCreated: 1522004249
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Scenes/GridWaveform.unity
+  uploadId: 368715

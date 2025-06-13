@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 432813add7efdc64996b39602a71176e
+timeCreated: 1453243328
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Prefabs/Particles/greenParticle3.prefab
+  uploadId: 368715

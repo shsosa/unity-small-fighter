@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4c267d716174d8b408a0483386736ff6
+timeCreated: 1486398059
+licenseType: Store
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Resources/PopDance.txt
+  uploadId: 368715

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 9180f7d07fb020a4da84660da8eb15eb
+timeCreated: 1480612252
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Scenes/Pre-Recorded.unity
+  uploadId: 368715

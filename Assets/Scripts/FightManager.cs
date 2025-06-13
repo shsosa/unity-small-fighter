@@ -52,6 +52,10 @@ public class FightManager : MonoBehaviour
     private int[] roundsWon;
     private int roundNum;
 
+    // Rhythm combat system support
+    private int lastDamageAmount = 0;
+    public GameObject rhythmHitTextPrefab;
+
     private void Awake()
     {
         if (instance != null && instance != this)
@@ -197,6 +201,50 @@ public class FightManager : MonoBehaviour
     public void OnQuitPressed()
     {
         SceneManager.LoadScene(0);
+    }
+    
+    // Rhythm combat system methods
+    
+    // Track damage for rhythm bonus calculations
+    public void SetLastDamage(int damage)
+    {
+        lastDamageAmount = damage;
+    }
+    
+    // Get the last damage amount for rhythm calculations
+    public int GetLastDamage()
+    {
+        return lastDamageAmount;
+    }
+    
+    // Display rhythm hit messages
+    public void ShowMessage(string message)
+    {
+        if (rhythmHitTextPrefab != null && guiCanvas != null)
+        {
+            GameObject messageObj = Instantiate(rhythmHitTextPrefab, guiCanvas.transform);
+            TextMeshProUGUI messageText = messageObj.GetComponent<TextMeshProUGUI>();
+            if (messageText != null)
+            {
+                messageText.text = message;
+                Destroy(messageObj, 2.0f);
+            }
+        }
+    }
+    
+    // Expose fighters for the rhythm system
+    public NewFighter[] GetFighters()
+    {
+        return fighters;
+    }
+    
+    // Allow external access to health bar updates
+    public void UpdateHealthBars()
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            fighterHealthBars[i].fillAmount = (float)fighters[i].currentHealth / fighters[i].maxHealth;
+        }
     }
 
     private IEnumerator StartRound()
@@ -369,31 +417,35 @@ public class FightManager : MonoBehaviour
         }
     }
 
-    public void OnFighterHit(NewFighter hitFighter, HitData hitData, bool attackWasBlocked)
+    public void OnFighterHit(NewFighter defender, HitData hit, bool blocking)
     {
-        Vector3 side = hitFighter.IsOnLeftSide ? Vector3.left : Vector3.right;
+        // Track last damage for rhythm combat
+        int damage = hit.action.damage;
+        SetLastDamage(damage);
+        
+        Vector3 side = defender.IsOnLeftSide ? Vector3.left : Vector3.right;
 
         // Push fighters back
-        if (hitData.action.type != ActionData.Type.Projectile)
+        if (hit.action.type != ActionData.Type.Projectile)
         {
-            RaycastHit2D wallHit = Physics2D.Raycast(hitFighter.boxCollider.bounds.center + side * hitFighter.boxCollider.bounds.extents.x * 0.95f, side, hitData.action.pushback);
+            RaycastHit2D wallHit = Physics2D.Raycast(defender.boxCollider.bounds.center + side * defender.boxCollider.bounds.extents.x * 0.95f, side, hit.action.pushback);
             if (wallHit)
-                hitData.hitbox.transform.parent.GetComponent<NewFighter>().controller.Move(side * -1f * hitData.action.pushback);
+                hit.hitbox.transform.parent.GetComponent<NewFighter>().controller.Move(side * -1f * hit.action.pushback);
             else
-                hitFighter.controller.Move(side * hitData.action.pushback);
+                defender.controller.Move(side * hit.action.pushback);
         }
         else
         {
-            hitFighter.controller.Move(side * hitData.action.pushback);
+            defender.controller.Move(side * hit.action.pushback);
         }
 
         // Spawn particle effect
-        Vector3 particlePos = hitFighter.boxCollider.bounds.center - side * hitFighter.boxCollider.bounds.extents.x;
-        particlePos.y = hitData.hitbox.boxCollider.bounds.center.y;
+        Vector3 particlePos = defender.boxCollider.bounds.center - side * defender.boxCollider.bounds.extents.x;
+        particlePos.y = hit.hitbox.boxCollider.bounds.center.y;
 
-        if (attackWasBlocked)
+        if (blocking)
         {
-            Instantiate(blockParticlePrefab, particlePos, Quaternion.Euler(0f, hitFighter.IsOnLeftSide ? -66f : 66f, 0f));
+            Instantiate(blockParticlePrefab, particlePos, Quaternion.Euler(0f, defender.IsOnLeftSide ? -66f : 66f, 0f));
         }
         else
         {
@@ -402,7 +454,7 @@ public class FightManager : MonoBehaviour
 
         StartCoroutine(Hitstop(3));
 
-        if (hitData.action.hitAnim == ActionData.HitAnim.Light || attackWasBlocked)
+        if (hit.action.hitAnim == ActionData.HitAnim.Light || blocking)
             StartCoroutine(ShakeCamera(5, 0.015f));
         else
             StartCoroutine(ShakeCamera(5, 0.03f));

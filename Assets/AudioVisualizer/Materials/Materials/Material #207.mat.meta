@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 5096c0dafe6d6ef4f94ce42cbed202a4
+timeCreated: 1454085111
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Materials/Materials/Material #207.mat
+  uploadId: 368715

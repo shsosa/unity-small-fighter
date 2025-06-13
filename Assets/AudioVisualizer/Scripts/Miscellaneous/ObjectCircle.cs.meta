@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: c6e1fede4a8b57146a97718235bbc7b2
+timeCreated: 1445547955
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Scripts/Miscellaneous/ObjectCircle.cs
+  uploadId: 368715

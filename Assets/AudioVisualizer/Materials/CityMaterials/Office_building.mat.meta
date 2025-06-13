@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 52af74f7a057f0141b70057f11477e05
+timeCreated: 1453391765
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Materials/CityMaterials/Office_building.mat
+  uploadId: 368715

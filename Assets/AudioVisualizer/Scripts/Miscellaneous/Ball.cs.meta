@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 80351485ff374ec45a736e188fd2df7a
+timeCreated: 1481837661
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Scripts/Miscellaneous/Ball.cs
+  uploadId: 368715

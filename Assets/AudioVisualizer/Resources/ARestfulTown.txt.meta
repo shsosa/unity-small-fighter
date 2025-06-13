@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 1b64f7611d11e494aa944333d26c4db6
+timeCreated: 1480875378
+licenseType: Store
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Resources/ARestfulTown.txt
+  uploadId: 368715

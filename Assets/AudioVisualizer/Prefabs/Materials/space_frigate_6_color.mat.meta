@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 573d26fd714290d4fb234095612c9b41
+timeCreated: 1453329683
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Prefabs/Materials/space_frigate_6_color.mat
+  uploadId: 368715

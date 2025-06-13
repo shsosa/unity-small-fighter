@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 5cd052ce7ea5a2f438f599e02de6a390
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Standard Assets/ParticleSystems/Shaders/PriorityParticleAdd.shader
+  uploadId: 368715

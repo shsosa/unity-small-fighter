@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 94c51805df59a5645949f89b499a4c6f
+timeCreated: 1453241507
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Prefabs/Particles/purpleParticle2.prefab
+  uploadId: 368715

@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: e27e68b408b09f24eb918898bb403988
+timeCreated: 1442961660
+licenseType: Store
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Materials/BlendTexture.shader
+  uploadId: 368715

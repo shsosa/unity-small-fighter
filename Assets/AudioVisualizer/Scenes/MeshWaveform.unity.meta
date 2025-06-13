@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4a2b4c76976946d4f9f0d8ad8de22949
+timeCreated: 1550955480
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Scenes/MeshWaveform.unity
+  uploadId: 368715

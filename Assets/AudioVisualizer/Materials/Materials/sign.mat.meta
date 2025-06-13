@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 1ea7ee2f8e049b54e89ce1a5321cea50
+timeCreated: 1454085111
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Materials/Materials/sign.mat
+  uploadId: 368715

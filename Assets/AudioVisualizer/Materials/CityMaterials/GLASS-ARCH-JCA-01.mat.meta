@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a71671537bd61b14a8ced06c6a8549d0
+timeCreated: 1453391729
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Materials/CityMaterials/GLASS-ARCH-JCA-01.mat
+  uploadId: 368715

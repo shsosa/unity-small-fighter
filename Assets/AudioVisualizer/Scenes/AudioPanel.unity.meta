@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 09b9b07a06d36384abfa9c9601525aa5
+timeCreated: 1443721804
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Scenes/AudioPanel.unity
+  uploadId: 368715

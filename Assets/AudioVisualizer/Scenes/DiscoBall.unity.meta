@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 7bdcc3341f8b9754da5605543ba68b39
+timeCreated: 1435596662
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Scenes/DiscoBall.unity
+  uploadId: 368715

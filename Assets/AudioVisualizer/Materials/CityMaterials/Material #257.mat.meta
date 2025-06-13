@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b8cb3ab9046e28c4d8ab3cd0e817e623
+timeCreated: 1453391729
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Materials/CityMaterials/Material #257.mat
+  uploadId: 368715

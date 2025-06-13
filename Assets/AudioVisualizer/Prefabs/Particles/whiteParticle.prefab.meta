@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4a80e54104bebab45998eeb2cde804e7
+timeCreated: 1453243209
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Prefabs/Particles/whiteParticle.prefab
+  uploadId: 368715

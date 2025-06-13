@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 38de7965ce69c51458ad0dce18eae425
+timeCreated: 1453229813
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Prefabs/Particles/redParticle.prefab
+  uploadId: 368715

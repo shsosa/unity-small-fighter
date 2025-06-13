@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 87e71b25c59d6aa4b8e530bcaa324379
+timeCreated: 1454020249
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Materials/PurpleNebula.mat
+  uploadId: 368715

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b7c222222f4ba874c89c7b00d37193fa
+timeCreated: 1453230304
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 47866
+  packageName: Audio Visualizer
+  packageVersion: 2.5
+  assetPath: Assets/AudioVisualizer/Prefabs/Particles/greenBurst.prefab
+  uploadId: 368715
