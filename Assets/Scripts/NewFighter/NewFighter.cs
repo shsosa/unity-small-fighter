@@ -33,6 +33,8 @@ public class NewFighter : MonoBehaviour
     public bool actionHasHit { get; set; }
     public bool blocking { get; set; }
     public bool canSpawnProjectile { get; set; }
+    public bool isAIControlled { get; set; } = false;
+    public InputData externalInput { get; set; }  // For AI control
     [field: SerializeField] public List<NewCollisionBox> currentHitboxes { get; private set; }
     [field: SerializeField] public List<NewCollisionBox> currentHurtboxes { get; private set; }
     
@@ -89,7 +91,18 @@ public class NewFighter : MonoBehaviour
 
     private void Update()
     {
-        currentInput = InputHelper.GetInputData(playerInput, IsOnLeftSide);
+        // If AI controlled, use external input instead of reading from player input
+        if (isAIControlled)
+        {
+            // Use external input if it's been set, otherwise default to neutral
+            currentInput = externalInput != null ? externalInput : new InputData();
+        }
+        else
+        {
+            // Use normal player input
+            currentInput = InputHelper.GetInputData(playerInput, IsOnLeftSide);
+        }
+        
         if (!paused)
         {
             onGround = Physics2D.Raycast(boxCollider.bounds.center, Vector2.down, boxCollider.bounds.extents.y + 0.015f, LayerMask.GetMask("Default"));

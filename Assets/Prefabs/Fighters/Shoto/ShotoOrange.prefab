@@ -125,6 +125,7 @@ GameObject:
   - component: {fileID: 3920262044624933351}
   - component: {fileID: 3920262044624933350}
   - component: {fileID: 4222953411211361292}
+  - component: {fileID: 4998233352144329458}
   m_Layer: 6
   m_Name: ShotoOrange
   m_TagString: Fighter
@@ -424,6 +425,24 @@ MonoBehaviour:
   hitEffectPrefab: {fileID: 0}
   onBeatColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   flashDuration: 0.1
+  comboText: {fileID: 0}
+--- !u!114 &4998233352144329458
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3920262044624933353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a67147ee79976d438b6632fc4e532ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  aggressiveness: 0.7
+  defensiveness: 0.3
+  randomness: 0.2
+  reactionTime: 0.1
+  decisionUpdateFrequency: 0.25
 --- !u!1 &4828172908916558260
 GameObject:
   m_ObjectHideFlags: 0
