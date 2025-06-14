@@ -138,7 +138,7 @@ public class BeatIndicatorAnimator : MonoBehaviour
         indicatorImage.color = readyColor;
     }
     
-    private void PulseIndicator()
+    public void PulseIndicator()
     {
         // Stop any existing pulse
         if (pulseCoroutine != null)

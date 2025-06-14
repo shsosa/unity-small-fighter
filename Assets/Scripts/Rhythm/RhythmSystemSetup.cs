@@ -8,6 +8,12 @@ using TMPro;
 /// Setup for the SimpleRhythm system with inspector configuration.
 /// Add this to any GameObject in your scene to initialize the rhythm system.
 /// </summary>
+// Helper class to maintain connection references
+public class RhythmShakeConnection {
+    public SimpleRhythmSystem rhythmSystem;
+    public ScreenShakeManager shakeManager;
+}
+
 public class RhythmSystemSetup : MonoBehaviour
 {
     [Header("Music Settings")]
@@ -43,6 +49,9 @@ public class RhythmSystemSetup : MonoBehaviour
     public bool enableScreenShake = true;
     public float shakeIntensity = 0.1f;
     public float shakeDuration = 0.2f;
+    
+    // Reference list to maintain connections
+    private static List<RhythmShakeConnection> rhythmManagersInScene = new List<RhythmShakeConnection>();
     
     private void Start()
     {
@@ -248,10 +257,14 @@ public class RhythmSystemSetup : MonoBehaviour
         if (enableScreenShake)
         {
             ScreenShakeManager shakeManager = FindOrCreateScreenShakeManager(canvas);
-            // Connect to rhythm system's OnBeat event
-            rhythmSystem.OnBeat += () => {
-                StartCoroutine(shakeManager.ShakeRoutine(shakeDuration, shakeIntensity));
-            };
+            // Store reference for direct access
+            rhythmSystem.GetComponent<MonoBehaviour>().StartCoroutine(MonitorBeats(rhythmSystem, shakeManager));
+            
+            // Save a persistent reference to avoid garbage collection
+            rhythmManagersInScene.Add(new RhythmShakeConnection { 
+                rhythmSystem = rhythmSystem, 
+                shakeManager = shakeManager 
+            });
         }
         
         // Create a hidden stub for compatibility with original system
@@ -294,17 +307,80 @@ public class RhythmSystemSetup : MonoBehaviour
         return shaker;
     }
     
-
-
+    // Monitor beats and trigger effects
+    private IEnumerator MonitorBeats(SimpleRhythmSystem rhythmSystem, ScreenShakeManager shakeManager)
+    {
+        BeatIndicatorAnimator beatAnimator = null;
+        
+        if (rhythmSystem.beatIndicator != null) {
+            beatAnimator = rhythmSystem.beatIndicator.GetComponent<BeatIndicatorAnimator>();
+        }
+        
+        float lastCheckTime = Time.time;
+        bool wasOnBeat = false;
+        
+        while (rhythmSystem != null && rhythmSystem.gameObject != null)
+        {
+            // Check for beat
+            bool isOnBeat = rhythmSystem.IsOnBeat();
+            
+            // Detect new beat
+            if (isOnBeat && !wasOnBeat)
+            {
+                // Update beat animator if available (but don't shake)
+                if (beatAnimator != null)
+                {
+                    // Just pulse the beat indicator, don't change color
+                    beatAnimator.PulseIndicator();
+                }
+            }
+            else if (!isOnBeat && wasOnBeat)
+            {
+                // End of beat - could show missed here
+            }
+            
+            wasOnBeat = isOnBeat;
+            
+            yield return null;
+        }
+    }
+    
     private void ConnectToRhythmEvents(SimpleRhythmSystem rhythmSystem)
     {
-        // Find all fighters
-        SimpleRhythmFighter[] rhythmFighters = FindObjectsOfType<SimpleRhythmFighter>();
+        // Connect rhythm fighters to the beat indicator for color feedback
+        SimpleRhythmFighter[] fighters = FindObjectsOfType<SimpleRhythmFighter>();
+        BeatIndicatorAnimator beatAnimator = null;
         
-        // Enable combo animation for all rhythm fighters
-        foreach (SimpleRhythmFighter fighter in rhythmFighters)
+        if (rhythmSystem.beatIndicator != null) {
+            beatAnimator = rhythmSystem.beatIndicator.GetComponent<BeatIndicatorAnimator>();
+        }
+        
+        foreach (SimpleRhythmFighter fighter in fighters)
         {
+            // Enable combo text animation
             EnableComboAnimation(fighter);
+            
+            // Connect to OnHit and OnMiss events with captured references
+            if (beatAnimator != null) {
+                SimpleRhythmFighter capturedFighter = fighter;
+                BeatIndicatorAnimator capturedAnimator = beatAnimator;
+                
+                // Hook up perfect hit feedback
+                fighter.OnPerfectHit += () => {
+                    capturedAnimator.ShowPerfectHit();
+                    
+                    // Directly trigger screen shake on perfect hit using static method
+                    if (enableScreenShake)
+                    {
+                        ScreenShakeManager.ShakeScreen(shakeDuration, shakeIntensity);
+                    }
+                };
+                
+                // Hook up missed feedback
+                fighter.OnMissedBeat += () => {
+                    capturedAnimator.ShowMissedBeat();
+                };
+            }
         }
     }
     

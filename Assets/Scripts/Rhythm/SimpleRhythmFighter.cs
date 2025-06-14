@@ -7,6 +7,10 @@ using UnityEngine;
 /// </summary>
 public class SimpleRhythmFighter : MonoBehaviour
 {
+    // Events for rhythm system feedback
+    public event System.Action OnPerfectHit;
+    public event System.Action OnMissedBeat;
+    
     [Header("Fighter")]
     public NewFighter fighter;
 
@@ -68,14 +72,15 @@ public class SimpleRhythmFighter : MonoBehaviour
     private IEnumerator MonitorAttacks()
     {
         Debug.Log("SimpleRhythmFighter: Started monitoring attacks");
+        bool wasActionHasHit = false;
         
         while (true)
         {
             // Check if fighter just started attacking
             bool isAttacking = fighter.currentState is Attacking && 
-                              fighter.currentAction != null && 
-                              !fighter.actionHasHit;
+                               fighter.currentAction != null;
             
+            // Track when attack starts (but don't trigger effects yet)
             if (isAttacking && !wasAttacking)
             {
                 Debug.Log("SimpleRhythmFighter: Detected attack start");
@@ -83,20 +88,46 @@ public class SimpleRhythmFighter : MonoBehaviour
                 // Check if the attack is on beat
                 if (rhythmSystem != null && rhythmSystem.IsOnBeat())
                 {
-                    // Rhythm hit!
-                    OnRhythmAttack();
-                    
-                    // Mark this attack
+                    // Mark this attack for later when it hits
                     currentAttackMarker = fighter.gameObject.AddComponent<SimpleRhythmAttackMarker>();
                     currentAttackMarker.timeOfAttack = Time.time;
                     currentAttackMarker.damageMultiplier = currentComboMultiplier;
+                    currentAttackMarker.wasOnBeat = true;
                 }
                 else
                 {
-                    // Reset combo if missing the beat
-                    ResetCombo();
+                    // Off-beat attack
+                    currentAttackMarker = fighter.gameObject.AddComponent<SimpleRhythmAttackMarker>();
+                    currentAttackMarker.wasOnBeat = false;
                 }
             }
+            
+            // Check if an attack just landed (actionHasHit changed from false to true)
+            if (isAttacking && fighter.actionHasHit && !wasActionHasHit)
+            {
+                Debug.Log("SimpleRhythmFighter: Attack landed");
+                
+                // Check if the attack was marked as on-beat
+                if (currentAttackMarker != null && currentAttackMarker.wasOnBeat)
+                {
+                    // Rhythm hit with successful contact!
+                    OnRhythmAttack();
+                    
+                    // Trigger the perfect hit event for visual feedback
+                    OnPerfectHit?.Invoke();
+                }
+                else if (currentAttackMarker != null && !currentAttackMarker.wasOnBeat)
+                {
+                    // Attack landed but wasn't on beat
+                    ResetCombo();
+                    
+                    // Trigger the missed beat event for visual feedback
+                    OnMissedBeat?.Invoke();
+                }
+            }
+            
+            // Track action hit state
+            wasActionHasHit = isAttacking && fighter.actionHasHit;
             
             // Update state tracking
             wasAttacking = isAttacking;
@@ -200,18 +231,5 @@ public class SimpleRhythmFighter : MonoBehaviour
         {
             Destroy(currentAttackMarker);
         }
-    }
-}
-
-// Used to mark attacks that happen on beat
-public class SimpleRhythmAttackMarker : MonoBehaviour
-{
-    public float timeOfAttack;
-    public float damageMultiplier = 1.0f;
-    
-    void Start()
-    {
-        // Auto-destroy after a short time to prevent lingering markers
-        Destroy(this, 0.5f);
     }
 }

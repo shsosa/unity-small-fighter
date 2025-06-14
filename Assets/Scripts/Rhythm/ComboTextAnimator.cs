@@ -45,9 +45,9 @@ public class ComboTextAnimator : MonoBehaviour
                 if (rhythmFighter.comboCount != lastComboCount)
                 {
                     // Update combo text
-                    if (rhythmFighter.comboCount > 1)
+                    if (rhythmFighter.comboCount >= 1)
                     {
-                        comboText.text = rhythmFighter.comboCount + " COMBO!";
+                        comboText.text = "Beat Combo " + rhythmFighter.comboCount;
                         
                         // Animate the text
                         if (animationCoroutine != null)
