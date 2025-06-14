@@ -180,8 +180,8 @@ public class FighterAI : MonoBehaviour
                 break;
                 
             case AIState.Defend:
-                // Block by moving away
-                simulatedInput.direction = controlledFighter.IsOnLeftSide ? 4 : 6;
+                // Block by moving away (holding back direction)
+                simulatedInput.direction = controlledFighter.IsOnLeftSide ? 4 : 1;
                 break;
                 
             case AIState.Retreat:

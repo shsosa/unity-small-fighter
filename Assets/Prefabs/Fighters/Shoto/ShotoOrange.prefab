@@ -439,8 +439,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   aggressiveness: 0.7
-  defensiveness: 0.3
-  randomness: 0.2
+  defensiveness: 0.326
+  randomness: 0.079
   reactionTime: 0.1
   decisionUpdateFrequency: 0.25
 --- !u!1 &4828172908916558260
