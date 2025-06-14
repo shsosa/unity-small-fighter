@@ -1704,7 +1704,7 @@ MonoBehaviour:
   musicClip: {fileID: 8300000, guid: bd18c881ec2bc9e4abaa995d53b47bc9, type: 3}
   bpm: 120
   volume: 0.7
-  beatWindowSeconds: 0.15
+  beatWindowSeconds: 0.2
   onBeatDamageMultiplier: 1.5
   maxComboMultiplier: 2
   comboMultiplierIncrement: 0.1

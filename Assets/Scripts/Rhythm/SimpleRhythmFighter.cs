@@ -160,6 +160,9 @@ public class SimpleRhythmFighter : MonoBehaviour
             Destroy(effect, 1.0f);
         }
         
+        // Show the rhythm hit text
+        ShowRhythmHitText();
+        
         // Show debug message
         Debug.Log($"RHYTHM HIT! Combo x{comboCount}, Multiplier x{currentComboMultiplier:F1}");
     }
@@ -222,6 +225,87 @@ public class SimpleRhythmFighter : MonoBehaviour
                 FightManager.instance.SetLastDamage(damage);
             }
         }
+    }
+    
+    /// <summary>
+    /// Shows a "RHYTHM HIT" text above the fighter
+    /// </summary>
+    private void ShowRhythmHitText()
+    {
+        // Find a canvas to use or create one if needed
+        Canvas canvas = FindObjectOfType<Canvas>();
+        if (canvas == null)
+        {
+            GameObject canvasObj = new GameObject("RhythmCanvas");
+            canvas = canvasObj.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvasObj.AddComponent<UnityEngine.UI.CanvasScaler>();
+            canvasObj.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+        }
+        
+        // Create a text object
+        GameObject textObj = new GameObject("RhythmHitText");
+        textObj.transform.SetParent(canvas.transform, false);
+        
+        // Add a text component
+        TMPro.TextMeshProUGUI textMesh = textObj.AddComponent<TMPro.TextMeshProUGUI>();
+        textMesh.text = _comboCount > 1 ? "RHYTHM COMBO x" + _comboCount : "RHYTHM HIT";
+        textMesh.fontSize = 36;
+        textMesh.color = onBeatColor;
+        textMesh.fontStyle = TMPro.FontStyles.Bold;
+        textMesh.alignment = TMPro.TextAlignmentOptions.Center;
+        
+        // Position it over the fighter's head - convert world position to screen position
+        RectTransform rectTransform = textMesh.GetComponent<RectTransform>();
+        Vector3 screenPos = Camera.main.WorldToScreenPoint(fighter.transform.position + new Vector3(0, 2, 0));
+        rectTransform.position = screenPos;
+        
+        // Start animation
+        StartCoroutine(AnimateRhythmHitText(textObj));
+    }
+    
+    /// <summary>
+    /// Animates the rhythm hit text with a bounce and fade effect
+    /// </summary>
+    private IEnumerator AnimateRhythmHitText(GameObject textObj)
+    {
+        if (textObj == null) yield break;
+        
+        RectTransform rectTransform = textObj.GetComponent<RectTransform>();
+        TMPro.TextMeshProUGUI textMesh = textObj.GetComponent<TMPro.TextMeshProUGUI>();
+        
+        if (rectTransform == null || textMesh == null) yield break;
+        
+        Vector3 initialPos = rectTransform.position;
+        float duration = 1.5f;
+        float elapsed = 0f;
+        
+        // Animate up and bounce
+        while (elapsed < duration)
+        {
+            // Scale effect - start big, then normalize
+            float scale = Mathf.Lerp(1.5f, 1.0f, elapsed / (duration * 0.3f));
+            rectTransform.localScale = new Vector3(scale, scale, 1);
+            
+            // Move up with slight bounce
+            float yOffset = Mathf.Lerp(0, 100, elapsed / duration) + 10 * Mathf.Sin(elapsed * 12f);
+            rectTransform.position = new Vector3(initialPos.x, initialPos.y + yOffset, initialPos.z);
+            
+            // After halfway point, start fading
+            if (elapsed > duration * 0.6f)
+            {
+                float alpha = Mathf.Lerp(1, 0, (elapsed - duration * 0.6f) / (duration * 0.4f));
+                Color c = textMesh.color;
+                c.a = alpha;
+                textMesh.color = c;
+            }
+            
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        
+        // Destroy the text when done
+        Destroy(textObj);
     }
     
     void OnDestroy()

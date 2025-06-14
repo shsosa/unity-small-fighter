@@ -151,19 +151,42 @@ public class HealthBarFeedbackManager : MonoBehaviour
         // Only process for actual damage taken
         if (damage > 0)
         {
-            // Check if this was a rhythm-enhanced hit
-            bool wasRhythmHit = IsRhythmHit(fighter);
+            // We no longer pass rhythm hit information to health bar feedback
+            // that's now handled separately in SimpleRhythmFighter
             
-            // Show feedback
+            // Just show regular damage feedback (no rhythm info)
             healthBarFeedbacks[fighterIndex].OnHealthChanged(
                 fighter.currentHealth, 
                 fighter.maxHealth, 
-                wasRhythmHit
+                false, // No longer passing rhythm hit status
+                0      // No longer passing combo count
             );
         }
         
         // Update previous health
         previousHealthValues[fighterIndex] = fighter.currentHealth;
+    }
+    
+    private SimpleRhythmFighter GetRhythmFighter(NewFighter fighter)
+    {
+        // Try to get from the same game object
+        SimpleRhythmFighter rhythmFighter = fighter.GetComponent<SimpleRhythmFighter>();
+        if (rhythmFighter != null)
+        {
+            return rhythmFighter;
+        }
+        
+        // If not found, search all rhythm fighters
+        SimpleRhythmFighter[] allRhythmFighters = FindObjectsOfType<SimpleRhythmFighter>();
+        foreach (var rf in allRhythmFighters)
+        {
+            if (rf.gameObject == fighter.gameObject)
+            {
+                return rf;
+            }
+        }
+        
+        return null;
     }
     
     private bool IsRhythmHit(NewFighter fighter)

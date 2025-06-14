@@ -386,11 +386,12 @@ public class RhythmSystemSetup : MonoBehaviour
     
     private void EnableComboAnimation(SimpleRhythmFighter fighter)
     {
-        // Add MonoBehaviour to handle animations
-        ComboTextAnimator animator = fighter.gameObject.AddComponent<ComboTextAnimator>();
-        animator.comboText = fighter.comboText;
-        animator.popupDuration = comboPopupDuration;
-        animator.popupScale = comboPopupScale;
+        // Note: ComboTextAnimator is now deprecated
+        // All combo animation is handled directly in SimpleRhythmFighter
+        // We no longer need to add this component, but keeping the method for compatibility
+        
+        // The following line is commented out because we're not using ComboTextAnimator anymore
+        // ComboTextAnimator animator = fighter.gameObject.AddComponent<ComboTextAnimator>();
     }
 
     private GameObject CreateHitEffectPrefab()

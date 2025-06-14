@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,18 +20,23 @@ public class HealthBarFeedback : MonoBehaviour
     [SerializeField] private Color normalDamageColor = Color.white;
     [SerializeField] private Color criticalDamageColor = Color.red;
     [SerializeField] private Color rhythmDamageColor = new Color(1f, 0.5f, 0f); // Orange
+    [SerializeField] private Color comboColor = new Color(1f, 0.8f, 0.2f); // Gold/Yellow for combo
     [SerializeField] private Font textFont; // Optional custom font (will use default if null)
     [SerializeField] private int fontSize = 64; // Much larger text size
     [SerializeField] private float textOffsetY = 50f; // Bigger Y offset from health bar for more visibility
     
     [Header("Animation Settings")]
     [SerializeField] private float scaleAmount = 1.2f;
-    [SerializeField] private float scaleDuration = 0.2f;
+    [SerializeField] private float scaleDuration = 0.2f; // Duration for scale animation
+    [SerializeField] private float fadeOutDuration = 0.5f;
+    [SerializeField] private Canvas parentCanvas; // Canvas to parent text elements to
     [SerializeField] private AnimationCurve scaleCurve;
     
     private int previousHealth = 100;
     private Vector3 originalScale;
     private Coroutine scaleCoroutine;
+    
+    // No longer tracking combo text objects as that's now handled in SimpleRhythmFighter
     
     private void Start()
     {
@@ -57,15 +64,16 @@ public class HealthBarFeedback : MonoBehaviour
     }
     
     /// <summary>
-    /// Called when a fighter takes damage
+    /// Called when the fighter's health changes
     /// </summary>
-    /// <param name="currentHealth">Current health value</param>
-    /// <param name="maxHealth">Maximum health value</param>
-    /// <param name="isRhythmHit">Whether this was a rhythm-enhanced hit</param>
-    public void OnHealthChanged(int currentHealth, int maxHealth, bool isRhythmHit = false)
+    public void OnHealthChanged(int newHealth, int maxHealth, bool rhythmHit = false, int comboCount = 0)
     {
+        // Skip if no health bar is set
+        if (healthBarImage == null)
+            return;
+
         // Calculate damage taken
-        int damage = previousHealth - currentHealth;
+        int damage = previousHealth - newHealth;
         
         // Only show feedback for damage (not healing)
         if (damage > 0)
@@ -75,16 +83,16 @@ public class HealthBarFeedback : MonoBehaviour
             
             // Show damage text
             bool isCritical = damage >= 20;
-            ShowDamageText(damage, isRhythmHit, isCritical);
+            ShowDamageText(damage, rhythmHit, isCritical, comboCount);
         }
         
         // Update previous health
-        previousHealth = currentHealth;
+        previousHealth = newHealth;
         
         // Update health bar if not already handled elsewhere
         if (healthBarImage != null)
         {
-            healthBarImage.fillAmount = (float)currentHealth / maxHealth;
+            healthBarImage.fillAmount = (float)newHealth / maxHealth;
         }
     }
     
@@ -94,7 +102,8 @@ public class HealthBarFeedback : MonoBehaviour
     /// <param name="damage">Amount of damage to show</param>
     /// <param name="isRhythmHit">Whether this was a rhythm-enhanced hit</param>
     /// <param name="isCritical">Whether this was a critical hit</param>
-    private void ShowDamageText(int damage, bool isRhythmHit = false, bool isCritical = false)
+    /// <param name="comboCount">Current combo count</param>
+    private void ShowDamageText(int damage, bool isRhythmHit = false, bool isCritical = false, int comboCount = 0)
     {
         // Determine parent for the text (canvas is required)
         Transform parent = damageTextParent;
@@ -139,9 +148,18 @@ public class HealthBarFeedback : MonoBehaviour
         
         // Format text content with prefixes for special hits
         string damageString = damage.ToString();
+        
+        // Format damage text based on hit type
         if (isRhythmHit)
         {
-            damageString = "RHYTHM! " + damageString;
+            if (damage >= 20)
+            {
+                damageString = "★ RHYTHM! " + damage.ToString() + "!! ★";
+            }
+            else
+            {
+                damageString = "RHYTHM! " + damage.ToString() + "!!";
+            }
         }
         else if (isCritical)
         {
@@ -210,21 +228,6 @@ public class HealthBarFeedback : MonoBehaviour
         }
         
         // Add outline/shadow for better visibility
-        try
-        {
-            var outlineType = Type.GetType("TMPro.TMP_Text+TextEffectGroup, Unity.TextMeshPro");
-            if (outlineType != null && usingTMP)
-            {
-                var textComp = damageTextObj.GetComponent(tmpType);
-                var outlineProp = tmpType.GetProperty("outlineWidth");
-                if (outlineProp != null)
-                {
-                    outlineProp.SetValue(textComp, 0.2f);
-                }
-            }
-        }
-        catch { } // Ignore outline errors
-        
         // Start the animation with string value and color
         StartCoroutine(AnimateDamageText(damageTextObj));
     }
@@ -393,6 +396,28 @@ public class HealthBarFeedback : MonoBehaviour
         
         // Clean up
         Destroy(textObj);
+    }
+    
+    // AnimateComboText method removed as combo text logic is no longer used
+    
+    /// <summary>
+    /// Gets the text component from a GameObject (either TextMeshProUGUI or Text)
+    /// </summary>
+    private Component GetTextComponent(GameObject textObject)
+    {
+        if (textObject == null) return null;
+        
+        // Try TMPro first
+        Type tmpType = Type.GetType("TMPro.TextMeshProUGUI, Unity.TextMeshPro");
+        if (tmpType != null)
+        {
+            Component tmpComponent = textObject.GetComponent(tmpType);
+            if (tmpComponent != null)
+                return tmpComponent;
+        }
+            
+        // Fallback to legacy Text
+        return textObject.GetComponent<Text>();
     }
     
     /// <summary>
