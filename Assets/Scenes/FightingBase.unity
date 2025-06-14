@@ -1710,6 +1710,18 @@ MonoBehaviour:
   beatIndicatorColor: {r: 1, g: 0.8, b: 0, a: 0.8}
   perfectTimingColor: {r: 0, g: 1, b: 0, a: 1}
   missedTimingColor: {r: 1, g: 0, b: 0, a: 1}
+  createFeedbackUI: 1
+  showComboText: 1
+  comboTextPosition: {x: 0, y: 200}
+  comboTextFontSize: 48
+  comboPopupDuration: 0.5
+  comboPopupScale: 1.5
+  beatIndicatorSize: 1
+  beatIndicatorPulseScale: 1.5
+  beatIndicatorPulseDuration: 0.2
+  enableScreenShake: 1
+  shakeIntensity: 0.5
+  shakeDuration: 0.2
 --- !u!1 &672639080
 GameObject:
   m_ObjectHideFlags: 0

@@ -29,11 +29,20 @@ public class RhythmSystemSetup : MonoBehaviour
     [Header("UI Feedback")]
     public bool createFeedbackUI = true;
     public bool showComboText = true;
-    public bool showTimingBar = true;
     public Vector2 comboTextPosition = new Vector2(0, 200);
     public int comboTextFontSize = 48;
     public float comboPopupDuration = 0.5f;
     public float comboPopupScale = 1.5f;
+    
+    [Header("Beat Indicator")]
+    public float beatIndicatorSize = 1.0f;
+    public float beatIndicatorPulseScale = 1.5f;
+    public float beatIndicatorPulseDuration = 0.2f;
+    
+    [Header("Screen Shake")]
+    public bool enableScreenShake = true;
+    public float shakeIntensity = 0.1f;
+    public float shakeDuration = 0.2f;
     
     private void Start()
     {
@@ -146,11 +155,8 @@ public class RhythmSystemSetup : MonoBehaviour
             CreateComboFeedbackUI(canvas, rhythmSystem);
         }
         
-        // Create timing bar
-        if (showTimingBar)
-        {
-            CreateTimingBarUI(canvas, rhythmSystem);
-        }
+        // Create beat indicator
+        CreateBeatIndicatorUI(canvas, rhythmSystem);
         
         // Connect to SimpleRhythmSystem events
         ConnectToRhythmEvents(rhythmSystem);
@@ -207,99 +213,88 @@ public class RhythmSystemSetup : MonoBehaviour
         }
     }
     
-    private void CreateTimingBarUI(Canvas canvas, SimpleRhythmSystem rhythmSystem)
+    private void CreateBeatIndicatorUI(Canvas canvas, SimpleRhythmSystem rhythmSystem)
     {
-        // Create timing bar container
-        GameObject barContainerObj = new GameObject("EnhancedTimingBarContainer");
-        barContainerObj.transform.SetParent(canvas.transform, false);
+        // Create beat indicator game object
+        GameObject beatIndicatorObj = new GameObject("BeatIndicator");
+        beatIndicatorObj.transform.SetParent(canvas.transform, false);
         
-        // Add background image
-        Image containerImage = barContainerObj.AddComponent<Image>();
-        containerImage.color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
+        // Add an image component for the beat indicator
+        Image indicatorImage = beatIndicatorObj.AddComponent<Image>();
+        indicatorImage.sprite = CreateCircleSprite(); // Same sprite we use for hit effects
+        indicatorImage.color = beatIndicatorColor;
         
-        // Position the container
-        RectTransform containerRect = containerImage.GetComponent<RectTransform>();
-        containerRect.anchorMin = new Vector2(0.5f, 0);
-        containerRect.anchorMax = new Vector2(0.5f, 0);
-        containerRect.pivot = new Vector2(0.5f, 0);
-        containerRect.anchoredPosition = new Vector2(0, 100);
-        containerRect.sizeDelta = new Vector2(500, 30);
+        // Position it at the bottom center of the screen
+        RectTransform indicatorRect = indicatorImage.GetComponent<RectTransform>();
+        indicatorRect.anchorMin = new Vector2(0.5f, 0);
+        indicatorRect.anchorMax = new Vector2(0.5f, 0);
+        indicatorRect.pivot = new Vector2(0.5f, 0.5f);
+        indicatorRect.anchoredPosition = new Vector2(0, 100);
+        indicatorRect.sizeDelta = new Vector2(80, 80);
         
-        // Create the actual timing bar
-        GameObject barObj = new GameObject("EnhancedTimingBar");
-        barObj.transform.SetParent(barContainerObj.transform, false);
+        // Set reference in rhythm system
+        rhythmSystem.beatIndicator = beatIndicatorObj;
         
-        Image barImage = barObj.AddComponent<Image>();
-        barImage.color = beatIndicatorColor;
+        // Add a beat indicator animator component to handle color and size changes
+        BeatIndicatorAnimator animator = beatIndicatorObj.AddComponent<BeatIndicatorAnimator>();
+        animator.indicatorImage = indicatorImage;
+        animator.pulseScale = beatIndicatorPulseScale;
+        animator.pulseDuration = beatIndicatorPulseDuration;
+        animator.readyColor = beatIndicatorColor;
+        animator.perfectColor = perfectTimingColor;
+        animator.missedColor = missedTimingColor;
         
-        RectTransform barRect = barImage.GetComponent<RectTransform>();
-        barRect.anchorMin = new Vector2(0, 0);
-        barRect.anchorMax = new Vector2(0, 1);
-        barRect.pivot = new Vector2(0, 0.5f);
-        barRect.anchoredPosition = Vector2.zero;
-        barRect.sizeDelta = new Vector2(0, 0);
+        // Add screen shake component
+        if (enableScreenShake)
+        {
+            ScreenShakeManager shakeManager = FindOrCreateScreenShakeManager(canvas);
+            // Connect to rhythm system's OnBeat event
+            rhythmSystem.OnBeat += () => {
+                StartCoroutine(shakeManager.ShakeRoutine(shakeDuration, shakeIntensity));
+            };
+        }
         
-        // Store reference - convert from TextMeshPro UI to standard UI if needed
-        // Since SimpleRhythmSystem expects Image, we can directly assign
-        rhythmSystem.hitTimingBar = barImage;
-        
-        // Create hit now text
-        GameObject hitNowObj = new GameObject("HitNowText");
-        hitNowObj.transform.SetParent(canvas.transform, false);
-        
-        TextMeshProUGUI hitNowText = hitNowObj.AddComponent<TextMeshProUGUI>();
-        hitNowText.text = "";
-        hitNowText.fontSize = 36;
-        hitNowText.color = perfectTimingColor;
-        hitNowText.alignment = TextAlignmentOptions.Center;
-        hitNowText.fontStyle = FontStyles.Bold;
-        
-        RectTransform hitNowRect = hitNowText.GetComponent<RectTransform>();
-        hitNowRect.anchorMin = new Vector2(0.5f, 0);
-        hitNowRect.anchorMax = new Vector2(0.5f, 0);
-        hitNowRect.pivot = new Vector2(0.5f, 0.5f);
-        hitNowRect.anchoredPosition = new Vector2(0, 150);
-        hitNowRect.sizeDelta = new Vector2(400, 50);
-        
-        // Create a Text component for compatibility with SimpleRhythmSystem
-        GameObject legacyTextObj = new GameObject("LegacyHitNowText");
-        legacyTextObj.transform.SetParent(canvas.transform, false);
-        Text legacyText = legacyTextObj.AddComponent<Text>();
-        legacyText.text = "";
-        legacyText.fontSize = 36;
-        legacyText.color = perfectTimingColor;
-        legacyText.alignment = TextAnchor.MiddleCenter;
-        
-        // Position it offscreen - we'll use our TMP version instead
-        RectTransform legacyRect = legacyText.GetComponent<RectTransform>();
-        legacyRect.anchoredPosition = new Vector2(-10000, -10000);
-        
-        // Store reference
-        rhythmSystem.hitNowText = legacyText;
-        
-        // We'll use our own TMP text for display, but sync it with the legacy text
-        StartCoroutine(SyncTextComponents(legacyText, hitNowText));
+        // Create a hidden stub for compatibility with original system
+        // (SimpleRhythmSystem might expect these to not be null)
+        SetUpCompatibilityStubs(canvas, rhythmSystem);
     }
     
-    private IEnumerator SyncTextComponents(Text sourceText, TextMeshProUGUI targetText)
+    private void SetUpCompatibilityStubs(Canvas canvas, SimpleRhythmSystem rhythmSystem)
     {
-        string lastText = "";
-        Color lastColor = Color.white;
+        // Create an invisible timing bar for compatibility
+        GameObject hiddenBar = new GameObject("HiddenTimingBar");
+        hiddenBar.transform.SetParent(canvas.transform, false);
+        Image barImage = hiddenBar.AddComponent<Image>();
+        barImage.color = Color.clear;
+        RectTransform barRect = barImage.GetComponent<RectTransform>();
+        barRect.sizeDelta = new Vector2(1, 1);
+        barRect.anchoredPosition = new Vector2(-10000, -10000);
+        rhythmSystem.hitTimingBar = barImage;
         
-        while (true)
-        {
-            // Copy text from the legacy Text to our TextMeshProUGUI
-            if (sourceText.text != lastText || sourceText.color != lastColor)
-            {
-                targetText.text = sourceText.text;
-                targetText.color = sourceText.color;
-                lastText = sourceText.text;
-                lastColor = sourceText.color;
-            }
-            
-            yield return new WaitForSeconds(0.05f); // Update at 20fps for efficiency
-        }
+        // Create hidden text for compatibility
+        GameObject hiddenTextObj = new GameObject("HiddenText");
+        hiddenTextObj.transform.SetParent(canvas.transform, false);
+        Text hiddenText = hiddenTextObj.AddComponent<Text>();
+        hiddenText.color = Color.clear;
+        RectTransform textRect = hiddenText.GetComponent<RectTransform>();
+        textRect.anchoredPosition = new Vector2(-10000, -10000);
+        rhythmSystem.hitNowText = hiddenText;
     }
+    
+    private ScreenShakeManager FindOrCreateScreenShakeManager(Canvas canvas)
+    {
+        // Find existing or create new screen shake manager
+        ScreenShakeManager shaker = FindObjectOfType<ScreenShakeManager>();
+        if (shaker == null)
+        {
+            GameObject shakerObj = new GameObject("ScreenShakeManager");
+            shaker = shakerObj.AddComponent<ScreenShakeManager>();
+            shaker.targetCanvas = canvas;
+        }
+        return shaker;
+    }
+    
+
 
     private void ConnectToRhythmEvents(SimpleRhythmSystem rhythmSystem)
     {
