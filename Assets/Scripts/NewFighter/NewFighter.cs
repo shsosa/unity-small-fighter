@@ -228,7 +228,27 @@ public class NewFighter : MonoBehaviour
         
         if (!blocking)
         {
-            currentHealth -= action.damage;
+            // Apply damage with rhythm bonus if available
+            int damageToApply = action.damage;
+            
+            // Use hitThisFrame to get the attacker reference if it's available
+            if (hitThisFrame != null && hitThisFrame.hitbox != null)
+            {
+                // Get the attacker fighter component from the hitbox's parent
+                NewFighter attacker = hitThisFrame.hitbox.transform.parent.GetComponent<NewFighter>();
+                if (attacker != null)
+                {
+                    SimpleRhythmFighter rhythmFighter = attacker.GetComponent<SimpleRhythmFighter>();
+                    if (rhythmFighter != null)
+                    {
+                        // Apply the rhythm damage bonus
+                        rhythmFighter.ApplyDamageBonus(ref damageToApply);
+                    }
+                }
+            }
+            
+            // Apply the final damage amount
+            currentHealth -= damageToApply;
             TookDamage.Invoke(this);
             FightManager.instance.PlaySound(SoundType.Hit, audioSource);
             if (onGround)
