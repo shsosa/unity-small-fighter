@@ -14,8 +14,9 @@ public class FighterAI : MonoBehaviour
     [Range(0f, 1f)] public float aggressiveness = 0.7f;
     [Range(0f, 1f)] public float defensiveness = 0.3f;
     [Range(0f, 1f)] public float randomness = 0.2f;
-    public float reactionTime = 0.1f;
+    [Range(0f, 1f)] public float rhythmAwareness = 0.8f;  // How much the AI favors the beat
     public float decisionUpdateFrequency = 0.25f;
+    public float reactionTime = 0.2f;
     
     // AI states
     private enum AIState { Idle, Approach, Attack, Defend, Retreat }
@@ -30,6 +31,8 @@ public class FighterAI : MonoBehaviour
     private float stateChangeCooldown = 0.5f;
     private float distanceToOpponent;
     private bool opponentIsAttacking;
+    private bool waitingForBeat = false;
+    private float beatWaitStartTime = 0f;
     
     private void Start()
     {
@@ -83,64 +86,139 @@ public class FighterAI : MonoBehaviour
             // Check if opponent is attacking
             opponentIsAttacking = opponentFighter.currentState is Attacking;
             
-            // Make decisions based on current state and conditions
-            if (Time.time >= lastDecisionTime + decisionUpdateFrequency)
+            // If rhythm system exists, check for beat timing
+            bool isOnBeat = SimpleRhythmSystem.instance?.IsOnBeat() ?? false;
+            
+            // If we're waiting for the beat and it's now on beat, attack immediately
+            if (waitingForBeat && isOnBeat)
             {
-                MakeDecisions();
+                ExecuteRhythmAttack();
+                waitingForBeat = false;
+                lastDecisionTime = Time.time;
+            }
+            // If we've been waiting for the beat too long, attack anyway
+            else if (waitingForBeat && (Time.time - beatWaitStartTime > 0.75f))
+            {
+                ExecuteRhythmAttack();
+                waitingForBeat = false;
+                lastDecisionTime = Time.time;
+                Debug.Log("FighterAI: Beat wait timeout - attacking anyway");
+            }
+            // Otherwise, make normal decisions
+            else if (!waitingForBeat && Time.time >= lastDecisionTime + decisionUpdateFrequency)
+            {
+                MakeDecisions(isOnBeat);
                 lastDecisionTime = Time.time;
                 
                 // Apply the simulated input directly to the fighter
                 controlledFighter.externalInput = simulatedInput;
                 Debug.Log("FighterAI: Set input direction to " + simulatedInput.direction + 
-                          ", A:" + simulatedInput.aPressed + ", B:" + simulatedInput.bPressed);
+                          ", A:" + simulatedInput.aPressed + ", B:" + simulatedInput.bPressed +
+                          ", OnBeat:" + isOnBeat);
             }
         }
     }
     
-    private void MakeDecisions()
+    private void ExecuteRhythmAttack()
+    {
+        // Execute an attack timed with the beat
+        simulatedInput = new InputData();
+        simulatedInput.direction = 5; // Neutral position for attack
+        
+        // Choose attack based on distance
+        if (distanceToOpponent < 1.5f)
+        {
+            // Close-range attack
+            simulatedInput.aPressed = true;
+        }
+        else if (distanceToOpponent < 3.0f)
+        {
+            // Medium-range attack
+            simulatedInput.bPressed = true;
+        }
+        else
+        {
+            // Long-range attack
+            simulatedInput.cPressed = true;
+        }
+        
+        // Apply the rhythm attack input
+        controlledFighter.externalInput = simulatedInput;
+        Debug.Log("FighterAI: Executing RHYTHM ATTACK with " + 
+                  (simulatedInput.aPressed ? "A" : simulatedInput.bPressed ? "B" : "C"));
+    }
+    
+    private void MakeDecisions(bool isOnBeat = false)
     {
         // Possibly change state based on conditions
         if (Time.time >= lastStateChangeTime + stateChangeCooldown)
         {
-            DecideNextState();
+            DecideNextState(isOnBeat);
             lastStateChangeTime = Time.time;
         }
         
         // Execute current state behavior
-        ExecuteCurrentState();
+        ExecuteCurrentState(isOnBeat);
+        
+        // Debug current state
+        Debug.Log("FighterAI: Current state: " + currentState + ", Distance: " + distanceToOpponent.ToString("F1") + ", OnBeat: " + isOnBeat);
     }
     
-    private void DecideNextState()
+    private void DecideNextState(bool isOnBeat = false)
     {
         float random = Random.value;
         
-        // Change state based on conditions and randomness
-        if (opponentIsAttacking && Random.value < defensiveness)
+        // For rhythm-aware AI, favor attacks when on beat
+        if (isOnBeat && Random.value < rhythmAwareness && distanceToOpponent < 4.0f)
         {
-            currentState = AIState.Defend;
-        }
-        else if (distanceToOpponent > 3.0f)
-        {
-            currentState = AIState.Approach;
-        }
-        else if (distanceToOpponent < 1.5f && Random.value < aggressiveness)
-        {
+            // If we're close enough and on beat, prefer attacking
             currentState = AIState.Attack;
+            Debug.Log("FighterAI: ON BEAT - Choosing to attack!");
         }
-        else if (controlledFighter.currentHealth < opponentFighter.currentHealth && Random.value < defensiveness)
+        else
         {
-            currentState = AIState.Retreat;
-        }
-        else if (Random.value < randomness)
-        {
-            // Random state change
-            currentState = (AIState)Random.Range(0, 5);
+            // Normal decision logic
+            if (opponentIsAttacking && Random.value < defensiveness)
+            {
+                currentState = AIState.Defend;
+            }
+            else if (distanceToOpponent > 3.0f)
+            {
+                currentState = AIState.Approach;
+            }
+            else if (distanceToOpponent < 1.5f && Random.value < aggressiveness)
+            {
+                // If we're not on beat but want to attack, maybe wait for the beat
+                if (!isOnBeat && SimpleRhythmSystem.instance != null && Random.value < rhythmAwareness)
+                {
+                    // Queue an attack on beat
+                    waitingForBeat = true;
+                    beatWaitStartTime = Time.time;
+                    currentState = AIState.Idle;
+                    Debug.Log("FighterAI: Waiting for beat to attack");
+                }
+                else
+                {
+                    currentState = AIState.Attack;
+                }
+            }
+            else if (controlledFighter.currentHealth < opponentFighter.currentHealth && Random.value < defensiveness)
+            {
+                currentState = AIState.Retreat;
+            }
+            else if (Random.value < randomness)
+            {
+                // Random state change
+                currentState = (AIState)Random.Range(0, 5);
+            }
         }
     }
     
-    private void ExecuteCurrentState()
+    private void ExecuteCurrentState(bool isOnBeat = false)
     {
-        // Reset input
+        Debug.Log("FighterAI: Executing state: " + currentState + (isOnBeat ? " ON BEAT" : ""));
+        
+        // Create empty input data
         simulatedInput = new InputData();
         simulatedInput.direction = 5; // Default to neutral
         
