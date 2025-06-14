@@ -19,8 +19,8 @@ public class HealthBarFeedback : MonoBehaviour
     [SerializeField] private Color criticalDamageColor = Color.red;
     [SerializeField] private Color rhythmDamageColor = new Color(1f, 0.5f, 0f); // Orange
     [SerializeField] private Font textFont; // Optional custom font (will use default if null)
-    [SerializeField] private int fontSize = 36;
-    [SerializeField] private float textOffsetY = 30f; // Y offset from health bar
+    [SerializeField] private int fontSize = 64; // Much larger text size
+    [SerializeField] private float textOffsetY = 50f; // Bigger Y offset from health bar for more visibility
     
     [Header("Animation Settings")]
     [SerializeField] private float scaleAmount = 1.2f;
@@ -74,7 +74,8 @@ public class HealthBarFeedback : MonoBehaviour
             PlayScaleAnimation();
             
             // Show damage text
-            ShowDamageText(damage, isRhythmHit);
+            bool isCritical = damage >= 20;
+            ShowDamageText(damage, isRhythmHit, isCritical);
         }
         
         // Update previous health
@@ -88,9 +89,12 @@ public class HealthBarFeedback : MonoBehaviour
     }
     
     /// <summary>
-    /// Shows a floating damage text - created entirely through code
+    /// Shows animated damage text
     /// </summary>
-    private void ShowDamageText(int damage, bool isRhythmHit)
+    /// <param name="damage">Amount of damage to show</param>
+    /// <param name="isRhythmHit">Whether this was a rhythm-enhanced hit</param>
+    /// <param name="isCritical">Whether this was a critical hit</param>
+    private void ShowDamageText(int damage, bool isRhythmHit = false, bool isCritical = false)
     {
         // Determine parent for the text (canvas is required)
         Transform parent = damageTextParent;
@@ -108,61 +112,92 @@ public class HealthBarFeedback : MonoBehaviour
                 return;
             }
         }
-            
+        
         // Create text game object
-        GameObject damageTextObj = new GameObject("DamageText");
+        GameObject damageTextObj = new GameObject("DamageText_" + damage.ToString());
         damageTextObj.transform.SetParent(parent, false);
         
-        // Set position relative to health bar
+        // Add RectTransform first (crucial for UI positioning)
         RectTransform rectTransform = damageTextObj.AddComponent<RectTransform>();
-        rectTransform.position = transform.position + new Vector3(0, textOffsetY, 0);
-        rectTransform.sizeDelta = new Vector2(200, 50); // Width and height
+        rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+        rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+        rectTransform.pivot = new Vector2(0.5f, 0.5f);
         
-        // Add either TextMeshProUGUI (if available) or regular Text component
-        // First try to use TextMeshProUGUI if available
-        bool usingTMP = false;
+        // Make it large enough
+        rectTransform.sizeDelta = new Vector2(200f, 100f); 
         
-        // Format text content
-        string damageString = damage.ToString();
-        Color textColor;
-        if (isRhythmHit)
+        // Position at health bar with offset for visibility
+        RectTransform healthBarRect = healthBarImage?.GetComponent<RectTransform>();
+        if (healthBarRect != null)
         {
-            textColor = rhythmDamageColor;
-            damageString = $"RHYTHM! {damageString}";
-        }
-        else if (damage >= 20) // Arbitrary threshold for "critical" hits
-        {
-            textColor = criticalDamageColor;
+            rectTransform.position = healthBarRect.position + new Vector3(0, 60f, 0);
         }
         else
         {
-            textColor = normalDamageColor;
+            rectTransform.position = transform.position + new Vector3(0, 60f, 0);
         }
         
-        // Try to use TextMeshPro if available
+        // Format text content with prefixes for special hits
+        string damageString = damage.ToString();
+        if (isRhythmHit)
+        {
+            damageString = "RHYTHM! " + damageString;
+        }
+        else if (isCritical)
+        {
+            damageString = "CRIT! " + damageString;
+        }
+        
+        // Choose color based on hit type
+        Color textColor = isRhythmHit ? rhythmDamageColor : 
+                        (isCritical ? criticalDamageColor : normalDamageColor);
+        
+        // Try to use TextMeshPro first
+        bool usingTMP = false;
         Type tmpType = Type.GetType("TMPro.TextMeshProUGUI, Unity.TextMeshPro");
+        
         if (tmpType != null)
         {
-            // TextMeshPro is available, use it
-            var textComponent = damageTextObj.AddComponent(tmpType) as Component;
+            // Create TMPro text component
+            Component textComponent = damageTextObj.AddComponent(tmpType);
             
-            // Set common properties via reflection
-            var textProperty = tmpType.GetProperty("text");
-            var colorProperty = tmpType.GetProperty("color");
-            var fontSizeProperty = tmpType.GetProperty("fontSize");
-            var alignmentProperty = tmpType.GetProperty("alignment");
+            // Set text properties via reflection
+            var textProp = tmpType.GetProperty("text");
+            var colorProp = tmpType.GetProperty("color");
+            var sizeProp = tmpType.GetProperty("fontSize");
+            var alignProp = tmpType.GetProperty("alignment");
+            var styleProp = tmpType.GetProperty("fontStyle");
             
-            if (textProperty != null) textProperty.SetValue(textComponent, damageString);
-            if (colorProperty != null) colorProperty.SetValue(textComponent, textColor);
-            if (fontSizeProperty != null) fontSizeProperty.SetValue(textComponent, fontSize);
+            if (textProp != null) textProp.SetValue(textComponent, damageString);
+            if (colorProp != null) colorProp.SetValue(textComponent, textColor);
+            if (sizeProp != null) sizeProp.SetValue(textComponent, fontSize);
             
-            // Center alignment (assumes TMPro.TextAlignmentOptions.Center = 514)
-            if (alignmentProperty != null) alignmentProperty.SetValue(textComponent, 514); 
+            // Center alignment (using enum value)
+            if (alignProp != null)
+            {
+                try
+                {
+                    var alignEnum = Enum.Parse(Type.GetType("TMPro.TextAlignmentOptions, Unity.TextMeshPro"), "Center");
+                    alignProp.SetValue(textComponent, alignEnum);
+                }
+                catch { } // Ignore if we can't set alignment
+            }
+            
+            // Try to make it bold
+            if (styleProp != null)
+            {
+                try
+                {
+                    var fontStyleEnum = Enum.Parse(styleProp.PropertyType, "Bold");
+                    styleProp.SetValue(textComponent, fontStyleEnum);
+                }
+                catch { } // Ignore if we can't set style
+            }
             
             usingTMP = true;
         }
         
-        // Fallback to regular Unity UI Text if TextMeshPro not available
+        // Fallback to regular Text if TMPro isn't available
         if (!usingTMP)
         {
             Text textComponent = damageTextObj.AddComponent<Text>();
@@ -171,84 +206,192 @@ public class HealthBarFeedback : MonoBehaviour
             textComponent.font = textFont ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
             textComponent.fontSize = fontSize;
             textComponent.alignment = TextAnchor.MiddleCenter;
+            textComponent.fontStyle = FontStyle.Bold;
         }
         
-        // Start animation
+        // Add outline/shadow for better visibility
+        try
+        {
+            var outlineType = Type.GetType("TMPro.TMP_Text+TextEffectGroup, Unity.TextMeshPro");
+            if (outlineType != null && usingTMP)
+            {
+                var textComp = damageTextObj.GetComponent(tmpType);
+                var outlineProp = tmpType.GetProperty("outlineWidth");
+                if (outlineProp != null)
+                {
+                    outlineProp.SetValue(textComp, 0.2f);
+                }
+            }
+        }
+        catch { } // Ignore outline errors
+        
+        // Start the animation with string value and color
         StartCoroutine(AnimateDamageText(damageTextObj));
     }
     
     /// <summary>
-    /// Animates the damage text floating up and fading out
+    /// Creates a quick pop-in scale effect for text
+    /// </summary>
+    private IEnumerator PopInEffect(GameObject textObj, Vector3 targetScale)
+    {
+        if (textObj == null) yield break;
+        
+        // Start small
+        textObj.transform.localScale = targetScale * 0.5f;
+        
+        // Pop to large size
+        float popDuration = 0.1f;
+        float popElapsed = 0f;
+        
+        // Overshoot scale
+        Vector3 overshootScale = targetScale * 1.5f;
+        
+        while (popElapsed < popDuration)
+        {
+            float t = popElapsed / popDuration;
+            // Ease out quad for quick pop
+            float easedT = t * (2 - t);
+            textObj.transform.localScale = Vector3.Lerp(targetScale * 0.5f, overshootScale, easedT);
+            
+            popElapsed += Time.deltaTime;
+            yield return null;
+        }
+        
+        // Settle back to normal size
+        popDuration = 0.1f;
+        popElapsed = 0f;
+        
+        while (popElapsed < popDuration)
+        {
+            float t = popElapsed / popDuration;
+            // Ease in out
+            float easedT = t < 0.5f ? 2 * t * t : 1 - (float)Math.Pow(-2 * t + 2, 2) / 2;
+            textObj.transform.localScale = Vector3.Lerp(overshootScale, targetScale, easedT);
+            
+            popElapsed += Time.deltaTime;
+            yield return null;
+        }
+        
+        // Ensure final scale is set
+        textObj.transform.localScale = targetScale;
+    }
+    
+    /// <summary>
+    /// Animations damage text - SUPERCHARGED for extreme visibility
     /// </summary>
     private IEnumerator AnimateDamageText(GameObject textObj)
     {
-        if (textObj == null)
-            yield break;
-            
-        float duration = 1.0f;
-        float elapsed = 0f;
+        if (textObj == null) yield break;
         
-        // Get the text component (either TextMeshProUGUI or regular Text)
-        Component textComponent = textObj.GetComponent(typeof(Component).Assembly.GetType("TMPro.TextMeshProUGUI")) 
-                                ?? (Component)textObj.GetComponent<Text>();
+        // Make sure text is at the front of the UI hierarchy
+        textObj.transform.SetAsLastSibling();
         
+        // Find text component
+        Component textComponent = textObj.GetComponent("TextMeshProUGUI") ?? 
+                                 textObj.GetComponent<Text>();
         if (textComponent == null)
         {
             Destroy(textObj);
             yield break;
         }
         
-        // Get the color property through reflection to handle both text types
-        System.Reflection.PropertyInfo colorProperty = textComponent.GetType().GetProperty("color");
+        // Get color property for fading
+        var colorProperty = textComponent.GetType().GetProperty("color");
         if (colorProperty == null)
         {
             Destroy(textObj);
             yield break;
         }
         
-        // Get starting position and scale
-        Vector3 startPosition = textObj.transform.position;
-        Vector3 targetPosition = startPosition + new Vector3(0, 50f, 0);
+        // Store original position/scale
+        RectTransform rectTransform = textObj.GetComponent<RectTransform>();
+        Vector2 startPosition = rectTransform.anchoredPosition;
         Vector3 startScale = textObj.transform.localScale;
-        Vector3 peakScale = startScale * 1.5f;
         
-        // Animate
-        while (elapsed < duration)
+        // Animation parameters
+        float duration = 1.8f;
+        float elapsed = 0f;
+        
+        // EXTREME movement values - visible for UI space
+        float velocityY = 600f;      // Very high upward velocity
+        float gravity = -2000f;     // Strong gravity for fast fall
+        float velocityX = UnityEngine.Random.Range(-300f, 300f); // Random horizontal
+        
+        // Initial pop animation
+        float popDuration = 0.1f;
+        for (float t = 0; t < popDuration; t += Time.deltaTime)
         {
-            float t = elapsed / duration;
-            
-            // Move up
-            textObj.transform.position = Vector3.Lerp(startPosition, targetPosition, t);
-            
-            // Scale up then down
-            if (t < 0.3f)
-            {
-                float scaleT = t / 0.3f;
-                textObj.transform.localScale = Vector3.Lerp(startScale, peakScale, scaleT);
-            }
-            else
-            {
-                float scaleT = (t - 0.3f) / 0.7f;
-                textObj.transform.localScale = Vector3.Lerp(peakScale, startScale * 0.5f, scaleT);
-            }
-            
-            // Fade out in second half
-            if (t > 0.5f)
-            {
-                // Get current color
-                Color currentColor = (Color)colorProperty.GetValue(textComponent);
-                
-                // Modify alpha
-                currentColor.a = Mathf.Lerp(1f, 0f, (t - 0.5f) * 2f);
-                
-                // Set new color
-                colorProperty.SetValue(textComponent, currentColor);
-            }
-            
-            elapsed += Time.deltaTime;
+            float normalized = t / popDuration;
+            textObj.transform.localScale = Vector3.Lerp(
+                startScale * 0.5f, 
+                startScale * 1.5f, // Extra large pop
+                Mathf.SmoothStep(0, 1, normalized)
+            );
             yield return null;
         }
         
+        // Reduce scale slightly after pop
+        textObj.transform.localScale = startScale * 1.2f;
+        
+        // Current animation position relative to start
+        float posY = 0;
+        float posX = 0;
+        Vector2 currentPos = startPosition;
+        
+        // Main physics animation loop
+        while (elapsed < duration)
+        {
+            float deltaTime = Time.deltaTime;
+            elapsed += deltaTime;
+            
+            // Apply velocity and gravity (scaled for UI space)
+            velocityY += gravity * deltaTime;
+            posY += velocityY * deltaTime;
+            posX += velocityX * deltaTime;
+            
+            // Bounce off "floor"
+            if (posY < -100f && velocityY < 0) // Use larger value for UI space
+            {
+                posY = -100f;
+                velocityY = -velocityY * 0.6f; // 60% bounce energy
+                velocityX *= 0.5f;             // Slow horizontal on bounce
+                
+                // Add impact effect
+                textObj.transform.localScale = startScale * 1.3f;
+                
+                // Stop bouncing if velocity is too low
+                if (velocityY < 200f)
+                {
+                    velocityY = 0;
+                    posY = -100f;
+                }
+            }
+            
+            // CRITICAL: Use anchoredPosition for UI movement
+            rectTransform.anchoredPosition = startPosition + new Vector2(posX, posY);
+            
+            // Dynamic rotation based on velocity
+            float tiltAmount = Mathf.Clamp(-velocityY / 100f, -20f, 20f);
+            textObj.transform.rotation = Quaternion.Euler(0, 0, tiltAmount);
+            
+            // Add subtle scale pulse
+            float baseScale = Mathf.Lerp(1.2f, 1.0f, elapsed / duration);
+            float pulse = baseScale + 0.1f * Mathf.Sin(elapsed * 15f);
+            textObj.transform.localScale = startScale * pulse;
+            
+            // Fade out in the latter part of animation
+            if (elapsed > duration * 0.6f)
+            {
+                float fadeRatio = (elapsed - (duration * 0.6f)) / (duration * 0.4f);
+                Color currentColor = (Color)colorProperty.GetValue(textComponent);
+                currentColor.a = Mathf.Clamp01(1f - fadeRatio);
+                colorProperty.SetValue(textComponent, currentColor);
+            }
+            
+            yield return null;
+        }
+        
+        // Clean up
         Destroy(textObj);
     }
     

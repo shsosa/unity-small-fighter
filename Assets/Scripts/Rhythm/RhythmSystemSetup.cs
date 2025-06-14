@@ -444,4 +444,34 @@ public class RhythmSystemSetup : MonoBehaviour
         
         return Sprite.Create(texture, new Rect(0, 0, resolution, resolution), new Vector2(0.5f, 0.5f));
     }
+    
+    /// <summary>
+    /// Sets up the health bar feedback system for damage text animations
+    /// </summary>
+    private void SetupHealthBarFeedback()
+    {
+        // Check if components already exist
+        SimpleRhythmHitDetector hitDetector = FindObjectOfType<SimpleRhythmHitDetector>();
+        if (hitDetector == null)
+        {
+            // Add to this GameObject
+            hitDetector = gameObject.AddComponent<SimpleRhythmHitDetector>();
+            Debug.Log("Added SimpleRhythmHitDetector component for damage text");
+        }
+        
+        HealthBarFeedbackManager feedbackManager = FindObjectOfType<HealthBarFeedbackManager>();
+        if (feedbackManager == null)
+        {
+            // Add to this GameObject
+            feedbackManager = gameObject.AddComponent<HealthBarFeedbackManager>();
+            Debug.Log("Added HealthBarFeedbackManager for damage text animations");
+        }
+        
+        // HealthBarFeedbackManager automatically creates and configures HealthBarFeedback components
+        // The settings for text size, colors, etc. are configured in the HealthBarFeedback class
+        if (feedbackManager != null)
+        {
+            Debug.Log("Health bar feedback manager is ready for damage text");
+        }
+    }
 }

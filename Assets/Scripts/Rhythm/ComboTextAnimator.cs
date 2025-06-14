@@ -11,6 +11,7 @@ public class ComboTextAnimator : MonoBehaviour
     public TextMeshProUGUI comboText;
     public float popupDuration = 0.5f;
     public float popupScale = 1.5f;
+    public float displayDuration = 3.0f; // How long the combo text stays visible before fading out
 
     private SimpleRhythmFighter rhythmFighter;
     private int lastComboCount = 0;
@@ -55,6 +56,9 @@ public class ComboTextAnimator : MonoBehaviour
                             StopCoroutine(animationCoroutine);
                         }
                         animationCoroutine = StartCoroutine(AnimateComboText());
+                        
+                        // Start fade out timer
+                        StartCoroutine(FadeOutComboTextAfterDelay());
                     }
                     else
                     {
@@ -71,32 +75,158 @@ public class ComboTextAnimator : MonoBehaviour
 
     private IEnumerator AnimateComboText()
     {
-        // Pop-up animation
-        float elapsed = 0;
+        // Store initial position and scale
+        Vector3 startPosition = comboText.transform.position;
         
-        // Scale up quickly
-        while (elapsed < popupDuration * 0.3f)
+        // Physics simulation parameters - MUCH more dramatic movement
+        float duration = 1.5f;  // Longer duration to see the full jump
+        float elapsed = 0f;
+        float initialVerticalVelocity = 500f;  // Much higher initial jump
+        float gravity = -1200f;                // Stronger gravity for faster fall
+        float horizontalVelocity = Random.Range(-50f, 50f);  // More horizontal movement
+        float currentVerticalVelocity = initialVerticalVelocity;
+        float currentVerticalPosition = 0f;
+        float horizontalPosition = 0f;
+        
+        // First do a quick pop-in scale effect
+        StartCoroutine(PopInScale());
+        
+        // Gravity-based physics animation
+        while (elapsed < duration)
+        {            
+            float deltaTime = Time.deltaTime;
+            elapsed += deltaTime;
+            
+            // Apply gravity physics
+            currentVerticalVelocity += gravity * deltaTime;
+            currentVerticalPosition += currentVerticalVelocity * deltaTime;
+            horizontalPosition += horizontalVelocity * deltaTime;
+            
+            // Bounce if we hit the "ground" (below starting position)
+            if (currentVerticalPosition < 0 && currentVerticalVelocity < 0)
+            {
+                currentVerticalPosition = 0f;
+                currentVerticalVelocity = -currentVerticalVelocity * 0.6f; // Bounce with 60% energy
+                horizontalVelocity *= 0.8f; // Reduce horizontal movement on bounce
+                
+                // Stop bouncing if the bounce is very small
+                if (Mathf.Abs(currentVerticalVelocity) < 50f)
+                {
+                    currentVerticalVelocity = 0;
+                    currentVerticalPosition = 0;
+                }
+            }
+            
+            // Apply the position with physics simulation
+            comboText.transform.position = startPosition + new Vector3(
+                horizontalPosition, 
+                currentVerticalPosition, 
+                0
+            );
+            
+            // Add rotation based on vertical velocity for more dynamic feel
+            float tiltAmount = Mathf.Clamp(-(currentVerticalVelocity / 400f), -10f, 10f);
+            comboText.transform.rotation = Quaternion.Euler(0, 0, tiltAmount);
+            
+            yield return null;
+        }
+        
+        // Return to the original position and rotation
+        comboText.transform.position = startPosition;
+        comboText.transform.rotation = Quaternion.identity;
+    }
+    
+    // Quick pop-in scale effect
+    private IEnumerator PopInScale()
+    {
+        // Initial pop effect
+        float popDuration = 0.15f;
+        float elapsed = 0f;
+        
+        // Pop to larger scale
+        Vector3 largeScale = originalScale * popupScale;
+        
+        // Quick pop out to larger size
+        while (elapsed < popDuration)
         {
-            float t = elapsed / (popupDuration * 0.3f);
-            comboText.transform.localScale = Vector3.Lerp(originalScale, originalScale * popupScale, t);
+            float t = elapsed / popDuration;
+            // Ease out quad
+            float easedT = t * (2 - t);
+            comboText.transform.localScale = Vector3.Lerp(originalScale, largeScale, easedT);
+            
             elapsed += Time.deltaTime;
             yield return null;
         }
         
-        // Scale back down more slowly
-        elapsed = 0;
-        Vector3 currentScale = comboText.transform.localScale;
+        // Then slightly contract back
+        elapsed = 0f;
+        popDuration = 0.1f;
         
-        while (elapsed < popupDuration * 0.7f)
+        while (elapsed < popDuration)
         {
-            float t = elapsed / (popupDuration * 0.7f);
-            comboText.transform.localScale = Vector3.Lerp(currentScale, originalScale, t);
+            float t = elapsed / popDuration;
+            comboText.transform.localScale = Vector3.Lerp(largeScale, originalScale * 1.1f, t);
+            
             elapsed += Time.deltaTime;
             yield return null;
         }
         
-        // Ensure we end at the original scale
+        // Apply pulsing throughout the physics animation
+        float pulseDuration = 1.0f;
+        elapsed = 0f;
+        
+        while (elapsed < pulseDuration)
+        {
+            float t = elapsed / pulseDuration;
+            float pulse = 1.1f + Mathf.Sin(t * Mathf.PI * 3) * 0.1f;
+            comboText.transform.localScale = originalScale * pulse;
+            
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        
+        // Ensure we return to original scale
         comboText.transform.localScale = originalScale;
+    }
+    
+    /// <summary>
+    /// Fades out the combo text after a specified delay
+    /// </summary>
+    private IEnumerator FadeOutComboTextAfterDelay()
+    {
+        // Wait for the display duration
+        yield return new WaitForSeconds(displayDuration);
+        
+        // Only fade out if we still have the same combo count
+        // (prevents fading if new combo has been shown since)
+        if (comboText != null && rhythmFighter != null && rhythmFighter.comboCount == lastComboCount)
+        {
+            // Fade out over time
+            float fadeDuration = 0.5f;
+            float elapsed = 0f;
+            Color originalColor = comboText.color;
+            
+            while (elapsed < fadeDuration)
+            {
+                float t = elapsed / fadeDuration;
+                
+                // Fade color
+                Color fadeColor = originalColor;
+                fadeColor.a = Mathf.Lerp(1, 0, t);
+                comboText.color = fadeColor;
+                
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+            
+            // Ensure text is invisible at the end
+            Color finalColor = comboText.color;
+            finalColor.a = 0;
+            comboText.color = finalColor;
+            
+            // Clear the text
+            comboText.text = "";
+        }
     }
     
     // Call this when a perfect hit happens
