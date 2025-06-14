@@ -1665,7 +1665,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 659383934}
-  - component: {fileID: 659383933}
+  - component: {fileID: 659383935}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -1673,25 +1673,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &659383933
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 659383932}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2448ab0183152d34282dd410543ce58a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  musicClip: {fileID: 8300000, guid: 5d70a33662f4d8248b0775b10c39e771, type: 3}
-  bpm: 120
-  volume: 0.7
-  beatWindowSeconds: 0.15
-  onBeatDamageMultiplier: 1.5
-  maxComboMultiplier: 2
-  comboMultiplierIncrement: 0.1
 --- !u!4 &659383934
 Transform:
   m_ObjectHideFlags: 0
@@ -1707,6 +1688,28 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &659383935
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 659383932}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91e51e79b7fcd9f4a8777548f179c8e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  musicClip: {fileID: 8300000, guid: bd18c881ec2bc9e4abaa995d53b47bc9, type: 3}
+  bpm: 120
+  volume: 0.7
+  beatWindowSeconds: 0.15
+  onBeatDamageMultiplier: 1.5
+  maxComboMultiplier: 2
+  comboMultiplierIncrement: 0.1
+  beatIndicatorColor: {r: 1, g: 0.8, b: 0, a: 0.8}
+  perfectTimingColor: {r: 0, g: 1, b: 0, a: 1}
+  missedTimingColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &672639080
 GameObject:
   m_ObjectHideFlags: 0
@@ -3633,7 +3636,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
