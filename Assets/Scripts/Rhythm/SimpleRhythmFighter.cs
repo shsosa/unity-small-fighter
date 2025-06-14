@@ -20,9 +20,13 @@ public class SimpleRhythmFighter : MonoBehaviour
     public GameObject hitEffectPrefab;
     public Color onBeatColor = Color.yellow;
     public float flashDuration = 0.1f;
+    public TMPro.TextMeshProUGUI comboText; // UI text for combo display
 
     // Private variables
-    private int comboCount = 0;
+    private int _comboCount = 0;
+    
+    // Public accessor for combo count
+    public int comboCount { get { return _comboCount; } }
     private float currentComboMultiplier = 1.0f;
     private bool wasAttacking = false;
     private SpriteRenderer[] fighterSprites;
@@ -104,12 +108,10 @@ public class SimpleRhythmFighter : MonoBehaviour
     private void OnRhythmAttack()
     {
         // Increment combo
-        comboCount++;
+        _comboCount++;
         
         // Update multiplier based on combo count
-        currentComboMultiplier = 1.0f + Mathf.Min(
-            (comboCount - 1) * comboMultiplierIncrement, 
-            maxComboMultiplier - 1.0f);
+        currentComboMultiplier = 1.0f + (Mathf.Min(_comboCount, maxComboCount) * comboMultiplierIncrement);
             
         Debug.Log($"SimpleRhythmFighter: Rhythm hit! Combo: {comboCount}, Multiplier: {currentComboMultiplier:F1}x");
         
@@ -136,7 +138,7 @@ public class SimpleRhythmFighter : MonoBehaviour
         if (comboCount > 0)
         {
             Debug.Log($"SimpleRhythmFighter: Combo reset (was {comboCount})");
-            comboCount = 0;
+            _comboCount = 0;
             currentComboMultiplier = 1.0f;
         }
     }

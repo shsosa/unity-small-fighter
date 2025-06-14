@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 /// <summary>
 /// Setup for the SimpleRhythm system with inspector configuration.
@@ -23,6 +25,15 @@ public class RhythmSystemSetup : MonoBehaviour
     public Color beatIndicatorColor = new Color(1, 0.8f, 0, 0.8f); // Golden yellow
     public Color perfectTimingColor = Color.green;
     public Color missedTimingColor = Color.red;
+    
+    [Header("UI Feedback")]
+    public bool createFeedbackUI = true;
+    public bool showComboText = true;
+    public bool showTimingBar = true;
+    public Vector2 comboTextPosition = new Vector2(0, 200);
+    public int comboTextFontSize = 48;
+    public float comboPopupDuration = 0.5f;
+    public float comboPopupScale = 1.5f;
     
     private void Start()
     {
@@ -64,8 +75,12 @@ public class RhythmSystemSetup : MonoBehaviour
             // The system will create one automatically
         }
         
-        // Initialize UI elements
-        // The SimpleRhythmSystem will create its own UI elements by default
+        // Create enhanced UI elements
+        if (createFeedbackUI)
+        {
+            StartCoroutine(SetupEnhancedUI(rhythmSystem));
+        }
+        // Otherwise the SimpleRhythmSystem will create basic UI elements by default
         
         // Find all fighters and add rhythm components to them
         StartCoroutine(SetupFightersDelayed());
@@ -110,6 +125,203 @@ public class RhythmSystemSetup : MonoBehaviour
         }
     }
     
+    private IEnumerator SetupEnhancedUI(SimpleRhythmSystem rhythmSystem)
+    {
+        yield return null; // Wait a frame to ensure the rhythm system is fully initialized
+        
+        // Find or create a canvas
+        Canvas canvas = FindObjectOfType<Canvas>();
+        if (canvas == null)
+        {
+            GameObject canvasObj = new GameObject("RhythmCanvas");
+            canvas = canvasObj.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvasObj.AddComponent<CanvasScaler>();
+            canvasObj.AddComponent<GraphicRaycaster>();
+        }
+
+        // Create combo text UI
+        if (showComboText)
+        {
+            CreateComboFeedbackUI(canvas, rhythmSystem);
+        }
+        
+        // Create timing bar
+        if (showTimingBar)
+        {
+            CreateTimingBarUI(canvas, rhythmSystem);
+        }
+        
+        // Connect to SimpleRhythmSystem events
+        ConnectToRhythmEvents(rhythmSystem);
+        
+        Debug.Log("RhythmSystemSetup: Enhanced UI setup complete");
+    }
+    
+    private void CreateComboFeedbackUI(Canvas canvas, SimpleRhythmSystem rhythmSystem)
+    {
+        // Find all fighters that have rhythm component
+        SimpleRhythmFighter[] rhythmFighters = FindObjectsOfType<SimpleRhythmFighter>();
+        float offset = 200f;
+        
+        // Create a mapping dictionary to track which fighter has which text
+        Dictionary<SimpleRhythmFighter, TextMeshProUGUI> comboTexts = 
+            new Dictionary<SimpleRhythmFighter, TextMeshProUGUI>();
+        
+        // Create UI first, then assign to fighters after all UI elements are created
+        for (int i = 0; i < rhythmFighters.Length; i++)
+        {
+            // Create combo text container
+            GameObject comboObj = new GameObject($"ComboText_Player{i+1}");
+            comboObj.transform.SetParent(canvas.transform, false);
+            
+            // Create the combo counter text
+            TextMeshProUGUI comboText = comboObj.AddComponent<TextMeshProUGUI>();
+            comboText.text = "";
+            comboText.fontSize = comboTextFontSize;
+            comboText.fontStyle = FontStyles.Bold;
+            comboText.alignment = TextAlignmentOptions.Center;
+            comboText.color = perfectTimingColor;
+            
+            // Position the text - left or right side based on player number
+            RectTransform rectTransform = comboText.GetComponent<RectTransform>();
+            float xPos = (i == 0) ? -offset : offset;
+            rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+            rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+            rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            rectTransform.anchoredPosition = new Vector2(xPos, comboTextPosition.y);
+            rectTransform.sizeDelta = new Vector2(300, 100);
+            
+            // Store in our mapping dictionary
+            comboTexts[rhythmFighters[i]] = comboText;
+        }
+        
+        // Now iterate through all rhythm fighters and assign the text component
+        foreach (var pair in comboTexts)
+        {
+            SimpleRhythmFighter fighter = pair.Key;
+            TextMeshProUGUI textComponent = pair.Value;
+            
+            // Store reference to fighter for combo tracking
+            fighter.comboText = textComponent;
+        }
+    }
+    
+    private void CreateTimingBarUI(Canvas canvas, SimpleRhythmSystem rhythmSystem)
+    {
+        // Create timing bar container
+        GameObject barContainerObj = new GameObject("EnhancedTimingBarContainer");
+        barContainerObj.transform.SetParent(canvas.transform, false);
+        
+        // Add background image
+        Image containerImage = barContainerObj.AddComponent<Image>();
+        containerImage.color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
+        
+        // Position the container
+        RectTransform containerRect = containerImage.GetComponent<RectTransform>();
+        containerRect.anchorMin = new Vector2(0.5f, 0);
+        containerRect.anchorMax = new Vector2(0.5f, 0);
+        containerRect.pivot = new Vector2(0.5f, 0);
+        containerRect.anchoredPosition = new Vector2(0, 100);
+        containerRect.sizeDelta = new Vector2(500, 30);
+        
+        // Create the actual timing bar
+        GameObject barObj = new GameObject("EnhancedTimingBar");
+        barObj.transform.SetParent(barContainerObj.transform, false);
+        
+        Image barImage = barObj.AddComponent<Image>();
+        barImage.color = beatIndicatorColor;
+        
+        RectTransform barRect = barImage.GetComponent<RectTransform>();
+        barRect.anchorMin = new Vector2(0, 0);
+        barRect.anchorMax = new Vector2(0, 1);
+        barRect.pivot = new Vector2(0, 0.5f);
+        barRect.anchoredPosition = Vector2.zero;
+        barRect.sizeDelta = new Vector2(0, 0);
+        
+        // Store reference - convert from TextMeshPro UI to standard UI if needed
+        // Since SimpleRhythmSystem expects Image, we can directly assign
+        rhythmSystem.hitTimingBar = barImage;
+        
+        // Create hit now text
+        GameObject hitNowObj = new GameObject("HitNowText");
+        hitNowObj.transform.SetParent(canvas.transform, false);
+        
+        TextMeshProUGUI hitNowText = hitNowObj.AddComponent<TextMeshProUGUI>();
+        hitNowText.text = "";
+        hitNowText.fontSize = 36;
+        hitNowText.color = perfectTimingColor;
+        hitNowText.alignment = TextAlignmentOptions.Center;
+        hitNowText.fontStyle = FontStyles.Bold;
+        
+        RectTransform hitNowRect = hitNowText.GetComponent<RectTransform>();
+        hitNowRect.anchorMin = new Vector2(0.5f, 0);
+        hitNowRect.anchorMax = new Vector2(0.5f, 0);
+        hitNowRect.pivot = new Vector2(0.5f, 0.5f);
+        hitNowRect.anchoredPosition = new Vector2(0, 150);
+        hitNowRect.sizeDelta = new Vector2(400, 50);
+        
+        // Create a Text component for compatibility with SimpleRhythmSystem
+        GameObject legacyTextObj = new GameObject("LegacyHitNowText");
+        legacyTextObj.transform.SetParent(canvas.transform, false);
+        Text legacyText = legacyTextObj.AddComponent<Text>();
+        legacyText.text = "";
+        legacyText.fontSize = 36;
+        legacyText.color = perfectTimingColor;
+        legacyText.alignment = TextAnchor.MiddleCenter;
+        
+        // Position it offscreen - we'll use our TMP version instead
+        RectTransform legacyRect = legacyText.GetComponent<RectTransform>();
+        legacyRect.anchoredPosition = new Vector2(-10000, -10000);
+        
+        // Store reference
+        rhythmSystem.hitNowText = legacyText;
+        
+        // We'll use our own TMP text for display, but sync it with the legacy text
+        StartCoroutine(SyncTextComponents(legacyText, hitNowText));
+    }
+    
+    private IEnumerator SyncTextComponents(Text sourceText, TextMeshProUGUI targetText)
+    {
+        string lastText = "";
+        Color lastColor = Color.white;
+        
+        while (true)
+        {
+            // Copy text from the legacy Text to our TextMeshProUGUI
+            if (sourceText.text != lastText || sourceText.color != lastColor)
+            {
+                targetText.text = sourceText.text;
+                targetText.color = sourceText.color;
+                lastText = sourceText.text;
+                lastColor = sourceText.color;
+            }
+            
+            yield return new WaitForSeconds(0.05f); // Update at 20fps for efficiency
+        }
+    }
+
+    private void ConnectToRhythmEvents(SimpleRhythmSystem rhythmSystem)
+    {
+        // Find all fighters
+        SimpleRhythmFighter[] rhythmFighters = FindObjectsOfType<SimpleRhythmFighter>();
+        
+        // Enable combo animation for all rhythm fighters
+        foreach (SimpleRhythmFighter fighter in rhythmFighters)
+        {
+            EnableComboAnimation(fighter);
+        }
+    }
+    
+    private void EnableComboAnimation(SimpleRhythmFighter fighter)
+    {
+        // Add MonoBehaviour to handle animations
+        ComboTextAnimator animator = fighter.gameObject.AddComponent<ComboTextAnimator>();
+        animator.comboText = fighter.comboText;
+        animator.popupDuration = comboPopupDuration;
+        animator.popupScale = comboPopupScale;
+    }
+
     private GameObject CreateHitEffectPrefab()
     {
         GameObject prefab = new GameObject("RhythmHitEffect");
