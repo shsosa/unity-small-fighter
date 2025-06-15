@@ -438,12 +438,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a67147ee79976d438b6632fc4e532ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  aggressiveness: 0.5
+  aggressiveness: 0.631
   defensiveness: 0.157
   randomness: 0.116
-  rhythmAwareness: 0.8
+  rhythmAwareness: 0.655
+  agilityFactor: 0.063
   decisionUpdateFrequency: 0.25
   reactionTime: 0.1
+  leftBoundary: -100
+  rightBoundary: 100
+  raycastDistance: 2
+  drawRaycastGizmos: 1
 --- !u!1 &4828172908916558260
 GameObject:
   m_ObjectHideFlags: 0
