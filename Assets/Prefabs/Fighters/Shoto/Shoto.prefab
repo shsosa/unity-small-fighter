@@ -126,6 +126,7 @@ GameObject:
   - component: {fileID: 3920262044624933350}
   - component: {fileID: 3891057164178089006}
   - component: {fileID: -2276421373582064020}
+  - component: {fileID: -7754369941154023841}
   m_Layer: 6
   m_Name: Shoto
   m_TagString: Fighter
@@ -446,15 +447,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 724f99ac713515942ad0ab8b2aecda92, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  comboSequence:
-  - {fileID: 11400000, guid: d887cfcce4bb137418364fe4b04b7b28, type: 2}
-  - {fileID: 11400000, guid: 1ce3f74b3816a5f42a4e06d2eb33b3ae, type: 2}
-  - {fileID: 11400000, guid: 744b0f587610d3c4b8db621205db4062, type: 2}
+  comboSequence: []
   hitsToProgress: 1
   missesToReset: 2
   normalHitColor: {r: 1, g: 1, b: 1, a: 1}
   rhythmHitColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   comboTextSize: 1.5
+--- !u!114 &-7754369941154023841
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3920262044624933353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1163c8d7227ddde4b9dbce96b0c6b5f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  laneUI: {fileID: 0}
+  fighter: {fileID: 3891057164178089006}
+  rhythmSystem: {fileID: 0}
 --- !u!1 &4828172908916558260
 GameObject:
   m_ObjectHideFlags: 0

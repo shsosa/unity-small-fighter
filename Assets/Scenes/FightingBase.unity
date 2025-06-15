@@ -1667,6 +1667,7 @@ GameObject:
   - component: {fileID: 659383934}
   - component: {fileID: 659383935}
   - component: {fileID: 659383936}
+  - component: {fileID: 659383937}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -1738,6 +1739,30 @@ MonoBehaviour:
   healthBarImages: []
   healthBarContainers: []
   mainCanvas: {fileID: 0}
+--- !u!114 &659383937
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 659383932}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ca603796493d4a40bcbcec7fe2d5932, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  numberOfLanes: 1
+  laneHeight: 80
+  laneWidth: 800
+  laneColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
+  laneDividerColor: {r: 1, g: 1, b: 0, a: 0.7}
+  noteSpeed: 200
+  noteSize: 40
+  normalNoteColor: {r: 1, g: 1, b: 1, a: 1}
+  perfectNoteColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  missedNoteColor: {r: 1, g: 0, b: 0, a: 1}
+  hitZoneSize: 50
+  hitZoneColor: {r: 0, g: 1, b: 0, a: 0.7}
 --- !u!1 &672639080
 GameObject:
   m_ObjectHideFlags: 0
