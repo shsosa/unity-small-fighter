@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 /// <summary>
 /// A simple rhythm-based fighter extension that works with SimpleRhythmSystem
@@ -10,6 +11,10 @@ public class SimpleRhythmFighter : MonoBehaviour
     // Events for rhythm system feedback
     public event System.Action OnPerfectHit;
     public event System.Action OnMissedBeat;
+    
+    // New UnityEvents for the combo system
+    public UnityEvent OnRhythmHit = new UnityEvent();
+    public UnityEvent OnRhythmMiss = new UnityEvent();
     
     [Header("Fighter")]
     public NewFighter fighter;
@@ -25,6 +30,11 @@ public class SimpleRhythmFighter : MonoBehaviour
     public Color onBeatColor = Color.yellow;
     public float flashDuration = 0.1f;
     public TMPro.TextMeshProUGUI comboText; // UI text for combo display
+    
+    [Header("Combo System")]
+    public bool useRhythmComboController = true;
+    [Tooltip("If true, will use the RhythmComboController to override attack actions")]
+    public bool overrideAttackWithCombo = true;
 
     // Private variables
     private int _comboCount = 0;
@@ -113,16 +123,20 @@ public class SimpleRhythmFighter : MonoBehaviour
                     // Rhythm hit with successful contact!
                     OnRhythmAttack();
                     
-                    // Trigger the perfect hit event for visual feedback
+                    // Apply note effects for perfect timing
+                    //PlayNote(beatIndicator.note, beatIndicator);
+
                     OnPerfectHit?.Invoke();
+                    OnRhythmHit?.Invoke(); // Trigger the rhythm hit event for combo system
                 }
                 else if (currentAttackMarker != null && !currentAttackMarker.wasOnBeat)
                 {
                     // Attack landed but wasn't on beat
                     ResetCombo();
                     
-                    // Trigger the missed beat event for visual feedback
+                    // Tell the system we missed
                     OnMissedBeat?.Invoke();
+                    OnRhythmMiss?.Invoke(); // Trigger the rhythm miss event for combo system
                 }
             }
             
@@ -207,7 +221,7 @@ public class SimpleRhythmFighter : MonoBehaviour
     // This method should be called from the damage system to apply rhythm damage bonus
     public void ApplyDamageBonus(ref int damage)
     {
-        if (currentAttackMarker != null && Time.time - currentAttackMarker.timeOfAttack < 0.5f)
+        if (currentAttackMarker != null)
         {
             // Apply combo multiplier to damage
             int originalDamage = damage;
@@ -215,14 +229,24 @@ public class SimpleRhythmFighter : MonoBehaviour
             
             Debug.Log($"Applied rhythm bonus: {originalDamage} → {damage} (x{currentAttackMarker.damageMultiplier})");
             
-            // Clean up marker
-            Destroy(currentAttackMarker);
-            currentAttackMarker = null;
-            
-            // Update last damage in FightManager
-            if (FightManager.instance != null)
+            // Visual feedback for damage
+            if (fighter != null)
             {
-                FightManager.instance.SetLastDamage(damage);
+                // Update last damage in FightManager
+                if (FightManager.instance != null)
+                {
+                    FightManager.instance.SetLastDamage(damage);
+                }
+            }
+            
+            // If we have a RhythmComboController, let it know about this successful hit
+            if (useRhythmComboController)
+            {
+                RhythmComboController comboController = GetComponent<RhythmComboController>();
+                if (comboController != null)
+                {
+                    comboController.OnRhythmHitDetected();
+                }
             }
         }
     }

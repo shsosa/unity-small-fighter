@@ -206,13 +206,32 @@ public class NewFighter : MonoBehaviour
 
         foreach (ActionData nextAction in potentialActions)
         {
-            if ((currentState is Walking && !nextAction.airOkay) || (currentState is Jumping && velocity.y <= 10f && nextAction.airOkay))
+            // Check if we should override with a rhythm combo action
+            ActionData actionToUse = nextAction;
+            
+            // Try to get rhythm combo controller and override the action if needed
+            SimpleRhythmFighter rhythmFighter = GetComponent<SimpleRhythmFighter>();
+            if (rhythmFighter != null && rhythmFighter.useRhythmComboController && rhythmFighter.overrideAttackWithCombo)
+            {
+                RhythmComboController comboController = GetComponent<RhythmComboController>();
+                if (comboController != null)
+                {
+                    ActionData comboAction = comboController.ModifyActionBasedOnCombo(nextAction);
+                    if (comboAction != null)
+                    {
+                        actionToUse = comboAction;
+                        Debug.Log($"Rhythm combo override: {nextAction.actionName} → {comboAction.actionName}");
+                    }
+                }
+            }
+            
+            if ((currentState is Walking && !actionToUse.airOkay) || (currentState is Jumping && velocity.y <= 10f && actionToUse.airOkay))
             {
                 if (currentAction == null || currentAction.alwaysCancelable)
                 {
-                    if (nextAction.projectiles.Length == 0 || canSpawnProjectile)
+                    if (actionToUse.projectiles.Length == 0 || canSpawnProjectile)
                     {
-                        currentAction = nextAction;
+                        currentAction = actionToUse;
                         SwitchState(new Attacking(this));
                         return;
                     }
