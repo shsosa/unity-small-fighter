@@ -420,8 +420,8 @@ MonoBehaviour:
   fighter: {fileID: 3920262044624933350}
   onBeatDamageMultiplier: 1.5
   maxComboCount: 10
-  maxComboMultiplier: 2
-  comboMultiplierIncrement: 0.1
+  maxComboMultiplier: 10
+  comboMultiplierIncrement: 1
   hitEffectPrefab: {fileID: 0}
   onBeatColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   flashDuration: 0.1
@@ -438,11 +438,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a67147ee79976d438b6632fc4e532ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  aggressiveness: 0.631
-  defensiveness: 0.157
-  randomness: 0.116
-  rhythmAwareness: 0.655
-  agilityFactor: 0
+  aggressiveness: 1
+  defensiveness: 0.337
+  randomness: 0.304
+  rhythmAwareness: 0.496
+  agilityFactor: 0.202
   decisionUpdateFrequency: 0.25
   reactionTime: 0.1
   leftBoundary: -100
