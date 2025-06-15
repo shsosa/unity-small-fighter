@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9413fa0a1edf4664aa87f22ac8ac4022, type: 3}
+  m_Name: test combo
+  m_EditorClassIdentifier: 
+  comboSequence:
+  - actionName: suriken
+    action: {fileID: 11400000, guid: 9665e72fbff02724fb63f52b1eaba63a, type: 2}
+    hitsToProgress: 2
+  - actionName: suriken
+    action: {fileID: 11400000, guid: 9f3b4efbd168c5246ba599b4766ecef1, type: 2}
+    hitsToProgress: 3
+  - actionName: suriken
+    action: {fileID: 11400000, guid: 107df6a556b67eb489dcf1ae9e0234df, type: 2}
+    hitsToProgress: 3
+  missesToReset: 2
+  normalHitColor: {r: 1, g: 1, b: 1, a: 1}
+  rhythmHitColor: {r: 0.015686274, g: 1, b: 0.28724355, a: 1}

@@ -447,12 +447,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 724f99ac713515942ad0ab8b2aecda92, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  comboSequence: []
-  hitsToProgress: 1
-  missesToReset: 2
-  normalHitColor: {r: 1, g: 1, b: 1, a: 1}
-  rhythmHitColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  comboDefinition: {fileID: 11400000, guid: b565f87dece677e4aa885ca3b9bce839, type: 2}
+  rhythmComboActionName: Attack1
   comboTextSize: 1.5
+  fallbackComboSequence: []
+  missesToReset: 2
 --- !u!114 &-7754369941154023841
 MonoBehaviour:
   m_ObjectHideFlags: 0

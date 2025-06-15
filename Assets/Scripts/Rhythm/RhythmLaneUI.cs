@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// Creates a rhythm game lane UI with scrolling notes at the bottom of the screen
@@ -17,6 +18,10 @@ public class RhythmLaneUI : MonoBehaviour
     
     [Header("Note Settings")]
     [SerializeField] private float noteSpeed = 200f; // Units per second
+    
+    [Header("Input Settings")]
+    private PlayerInput playerInput;
+    [SerializeField] private string attackActionName = "Attack1"; // Same action name used for attacks
     [SerializeField] private float noteSize = 40f;
     [SerializeField] private Color normalNoteColor = Color.white;
     [SerializeField] private Color perfectNoteColor = Color.yellow;
@@ -89,9 +94,33 @@ public class RhythmLaneUI : MonoBehaviour
         
         // Create lanes
         CreateLanes();
+    }
+    
+    private void Start()
+    {
+        Canvas canvas = FindObjectOfType<Canvas>();
+        if (canvas == null)
+        {
+            Debug.LogError("RhythmLaneUI requires a Canvas in the scene");
+            return;
+        }
+        
+        // Get or create SimpleRhythmSystem
+        rhythmSystem = FindObjectOfType<SimpleRhythmSystem>();
+        if (rhythmSystem == null)
+        {
+            GameObject obj = new GameObject("SimpleRhythmSystem");
+            rhythmSystem = obj.AddComponent<SimpleRhythmSystem>();
+        }
+        
+        // Get PlayerInput component (from any active fighter)
+        playerInput = FindObjectOfType<PlayerInput>();
+        if (playerInput == null)
+        {
+            Debug.LogWarning("RhythmLaneUI could not find a PlayerInput component. Input detection will not work.");
+        }
         
         // Find the rhythm system
-        rhythmSystem = FindObjectOfType<SimpleRhythmSystem>();
         if (rhythmSystem != null)
         {
             secondsPerBeat = 60f / rhythmSystem.bpm;
@@ -250,8 +279,34 @@ public class RhythmLaneUI : MonoBehaviour
         // Approximate current beat number
         float currentBeat = Time.time / secondsPerBeat;
         
-        // Check for hits when player presses attack button
-        if (Input.GetKeyDown(KeyCode.Z) || Input.GetKeyDown(KeyCode.N)) // Player 1 or 2 attack keys
+        // We no longer check for input here
+        // Input is now handled by OnAttackInput which is called by the Input System
+    }
+    
+    void OnEnable()
+    {
+        if (playerInput != null)
+        {
+            // Subscribe to the attack action
+            playerInput.actions[attackActionName].performed += OnAttackInput;
+        }
+    }
+    
+    void OnDisable()
+    {
+        if (playerInput != null)
+        {
+            // Unsubscribe from the attack action
+            playerInput.actions[attackActionName].performed -= OnAttackInput;
+        }
+    }
+    
+    private void OnAttackInput(InputAction.CallbackContext context)
+    {
+        // Approximate current beat number
+        float currentBeat = Time.time / secondsPerBeat;
+        
+        // Process the hit
         {
             bool hitSuccess = false;
             float closestBeatDiff = float.MaxValue;
