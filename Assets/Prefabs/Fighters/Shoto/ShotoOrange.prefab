@@ -442,7 +442,7 @@ MonoBehaviour:
   defensiveness: 0.157
   randomness: 0.116
   rhythmAwareness: 0.655
-  agilityFactor: 0.063
+  agilityFactor: 0
   decisionUpdateFrequency: 0.25
   reactionTime: 0.1
   leftBoundary: -100

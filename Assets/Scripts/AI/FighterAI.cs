@@ -15,9 +15,10 @@ public class FighterAI : MonoBehaviour
     [Range(0f, 1f)] public float defensiveness = 0.3f;
     [Range(0f, 1f)] public float randomness = 0.2f;
     [Range(0f, 1f)] public float rhythmAwareness = 0.8f;  // How much the AI favors the beat
-    [Range(0f, 1f)] public float agilityFactor = 0.5f;    // How often AI will jump during movement
+    [Range(0f, 1f)] public float agilityFactor = 0.1f;    // How often AI will jump during movement
     public float decisionUpdateFrequency = 0.25f;
     public float reactionTime = 0.2f;
+    private float jumpCooldown = 2.5f; // Increased cooldown between jumps
     
     [Header("Stage Settings")]
     public float leftBoundary = -8.5f;  // Default stage left boundary
@@ -49,7 +50,6 @@ public class FighterAI : MonoBehaviour
     private bool waitingForBeat = false;
     private float beatWaitStartTime = 0f;
     private float lastJumpTime = 0f;
-    private float jumpCooldown = 0.8f;  // Don't jump too frequently
     
     // Wall escape variables
     private float stuckTimer = 0f;
@@ -240,50 +240,61 @@ public class FighterAI : MonoBehaviour
             return;
         }
         
-        // For rhythm-aware AI, favor attacks when on beat
-        if (isOnBeat && Random.value < rhythmAwareness && distanceToOpponent < 4.0f)
+        // ENHANCED ATTACK LOGIC - More aggressive with attacks
+
+        // Attack on beat with high probability (rhythm awareness)
+        if (isOnBeat && Random.value < rhythmAwareness && distanceToOpponent < 5.0f) 
         {
-            // If we're close enough and on beat, prefer attacking
             currentState = AIState.Attack;
-            Debug.Log("FighterAI: ON BEAT - Choosing to attack!");
+            Debug.Log("FighterAI: ON BEAT - Aggressive attack!");
+            return;
         }
-        else
+        
+        // Defend only if opponent is attacking and we're feeling defensive
+        if (opponentIsAttacking && Random.value < defensiveness * 0.7f) 
         {
-            // Normal decision logic
-            if (opponentIsAttacking && Random.value < defensiveness)
-            {
-                currentState = AIState.Defend;
-            }
-            else if (distanceToOpponent > 3.0f)
-            {
-                currentState = AIState.Approach;
-            }
-            else if (distanceToOpponent < 1.5f && Random.value < aggressiveness)
-            {
-                // If we're not on beat but want to attack, maybe wait for the beat
-                if (!isOnBeat && SimpleRhythmSystem.instance != null && Random.value < rhythmAwareness)
-                {
-                    // Queue an attack on beat
-                    waitingForBeat = true;
-                    beatWaitStartTime = Time.time;
-                    currentState = AIState.Idle;
-                    Debug.Log("FighterAI: Waiting for beat to attack");
-                }
-                else
-                {
-                    currentState = AIState.Attack;
-                }
-            }
-            else if (controlledFighter.currentHealth < opponentFighter.currentHealth && Random.value < defensiveness)
-            {
-                currentState = AIState.Retreat;
-            }
-            else if (Random.value < randomness)
-            {
-                // Random state change
-                currentState = (AIState)Random.Range(0, 5);
-            }
+            currentState = AIState.Defend;
+            Debug.Log("FighterAI: Defending against attack");
+            return;
         }
+        
+        // INCREASED ATTACK PROBABILITY AND RANGE
+        // Higher chance to attack when in good range
+        if (distanceToOpponent < 4.0f && Random.value < aggressiveness * 1.5f) 
+        {
+            currentState = AIState.Attack;
+            Debug.Log("FighterAI: In perfect attack range, initiating attack");
+            return;
+        }
+        
+        // More opportunistic attacks even at medium range
+        if (distanceToOpponent < 5.5f && Random.value < aggressiveness) 
+        {
+            currentState = AIState.Attack;
+            Debug.Log("FighterAI: Opportunistic attack at medium range");
+            return;
+        }
+        
+        // APPROACH MORE AGGRESSIVELY
+        // If not in attack range but not too far, approach
+        if (distanceToOpponent < 7.0f)
+        {
+            currentState = AIState.Approach;
+            Debug.Log("FighterAI: Aggressively approaching opponent for attack");
+            return;
+        }
+        
+        // Only retreat if too far away
+        if (distanceToOpponent > 7.0f) 
+        {
+            currentState = AIState.Retreat;
+            Debug.Log("FighterAI: Too far, retreating to better position");
+            return;
+        }
+        
+        // Default: approach
+        currentState = AIState.Approach;
+        Debug.Log("FighterAI: Default approaching");
     }
     
     private void ExecuteCurrentState(bool isOnBeat = false)
@@ -308,22 +319,13 @@ public class FighterAI : MonoBehaviour
                 // Move toward opponent
                 simulatedInput.direction = controlledFighter.IsOnLeftSide ? 6 : 4;
                 
-                // Occasionally jump for more agile movement
-                if (Random.value < agilityFactor * 0.3f && Time.time > lastJumpTime + jumpCooldown)
-                {
-                    simulatedInput.jumpPressed = true;
-                    lastJumpTime = Time.time;
-                    
-                    // Sometimes do diagonal jumps
-                    if (Random.value < 0.5f)
-                    {
-                        // Jump diagonally toward opponent
-                        simulatedInput.direction = controlledFighter.IsOnLeftSide ? 9 : 7; // diagonal jump
-                        Debug.Log("FighterAI: Agile diagonal jump toward opponent");
-                    }
-                    else
-                    {
-                        Debug.Log("FighterAI: Agile vertical jump while approaching");
+                // Occasionally jump while approaching, but much less frequently
+                if (Random.value < agilityFactor * 0.5f && Time.time > lastJumpTime + jumpCooldown) {
+                    // Only jump if we're not too far from the opponent
+                    if (distanceToOpponent < 5.0f) {
+                        simulatedInput.jumpPressed = true;
+                        lastJumpTime = Time.time;
+                        Debug.Log("FighterAI: Occasional approach jump");
                     }
                 }
                 break;
@@ -357,13 +359,16 @@ public class FighterAI : MonoBehaviour
                 // Move away from opponent
                 simulatedInput.direction = controlledFighter.IsOnLeftSide ? 4 : 6;
                 
-                // Jump back with higher probability for better agility
-                if (Random.value < 0.45f && Time.time > lastJumpTime + jumpCooldown)
+                // Very rarely jump during retreat (significantly reduced frequency)
+                if (Random.value < 0.15f && Time.time > lastJumpTime + jumpCooldown * 1.5f)
                 {
-                    simulatedInput.jumpPressed = true;
-                    simulatedInput.direction = controlledFighter.IsOnLeftSide ? 7 : 9;
-                    lastJumpTime = Time.time;
-                    Debug.Log("FighterAI: Evasive jumping retreat");
+                    // Only jump if in a tight spot (opponent close)
+                    if (distanceToOpponent < 3.0f) {
+                        simulatedInput.jumpPressed = true;
+                        simulatedInput.direction = controlledFighter.IsOnLeftSide ? 7 : 9;
+                        lastJumpTime = Time.time;
+                        Debug.Log("FighterAI: Evasive jumping retreat");
+                    }
                 }
                 break;
                 
@@ -371,8 +376,8 @@ public class FighterAI : MonoBehaviour
                 // Enhanced wall escape logic - more aggressive and reliable
                 // Use the explicit detection flags for better accuracy
                 
-                // Always try jumping if we're in wall avoidance state
-                bool shouldJump = Time.time > lastJumpTime + jumpCooldown * 0.5f; // Reduced cooldown for wall escapes
+                // Try jumping sometimes in wall avoidance state, but not too frequently
+                bool shouldJump = Time.time > lastJumpTime + jumpCooldown * 0.8f; // Less reduced cooldown for wall escapes
                 
                 // Determine escape direction based on which wall was actually detected
                 int escapeDirection;
