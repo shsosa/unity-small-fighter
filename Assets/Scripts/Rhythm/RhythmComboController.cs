@@ -37,6 +37,9 @@ public class RhythmComboController : MonoBehaviour
     
     // Track if we're already in a combo
     private bool inComboSequence = false;
+    private bool comboActive = false;
+    private bool wasComboProcessedThisFrame = false;
+    private float lastHitTime = 0f;
     
     void Start()
     {
@@ -160,6 +163,8 @@ public class RhythmComboController : MonoBehaviour
         ShowComboStatus();
     }
     
+
+    
     /// <summary>
     /// Called when a rhythm miss is detected
     /// </summary>
@@ -246,8 +251,18 @@ public class RhythmComboController : MonoBehaviour
         // Using ScriptableObject combo actions
         if (comboActions.Count > 0)
         {
-            // Increment combo index and wrap around
-            currentComboIndex = (currentComboIndex + 1) % comboActions.Count;
+            // Increment combo index
+            currentComboIndex++;
+            
+            // Check if we've reached the end of the sequence
+            if (currentComboIndex >= comboActions.Count)
+            {
+                // Reached the end of the sequence, reset and start over
+                Debug.Log("Combo sequence completed! Resetting to first action.");
+                ResetCombo();
+                return;
+            }
+            
             inComboSequence = true;
             
             // Feedback for new combo level
@@ -256,8 +271,18 @@ public class RhythmComboController : MonoBehaviour
         // Using fallback sequence
         else if (fallbackComboSequence.Count > 0)
         {
-            // Increment combo index and wrap around
-            currentComboIndex = (currentComboIndex + 1) % fallbackComboSequence.Count;
+            // Increment combo index
+            currentComboIndex++;
+            
+            // Check if we've reached the end of the sequence
+            if (currentComboIndex >= fallbackComboSequence.Count)
+            {
+                // Reached the end of the sequence, reset and start over
+                Debug.Log("Combo sequence completed! Resetting to first action.");
+                ResetCombo();
+                return;
+            }
+            
             inComboSequence = true;
             
             // Feedback for new combo level
@@ -270,12 +295,33 @@ public class RhythmComboController : MonoBehaviour
     /// </summary>
     private void ResetCombo()
     {
+        // Reset all combo state variables
         currentComboIndex = 0;
         successfulHits = 0;
         missedHits = 0;
         inComboSequence = false;
+        comboActive = false;
+        wasComboProcessedThisFrame = false;
         
-        Debug.Log("Combo reset");
+        // Force lastHitTime to a value that won't trigger a timeout immediately
+        lastHitTime = Time.time;
+        
+        // Verify the current action that will be used next
+        ActionData nextAction = null;
+        if (comboActions.Count > 0)
+        {
+            nextAction = comboActions[0].action;
+            Debug.Log($"[DEBUG] Combo FULLY RESET to first action: {comboActions[0].actionName}");
+        }
+        else if (fallbackComboSequence.Count > 0)
+        {
+            nextAction = fallbackComboSequence[0];
+            Debug.Log($"[DEBUG] Combo FULLY RESET to first fallback action");
+        }
+        else
+        {
+            Debug.LogWarning("[DEBUG] Combo reset but no actions are defined!");
+        }
     }
     
     /// <summary>
@@ -308,7 +354,8 @@ public class RhythmComboController : MonoBehaviour
         }
         else if (fallbackComboSequence.Count > 0 && currentComboIndex < fallbackComboSequence.Count)
         {
-            actionName = fallbackComboSequence[currentComboIndex].actionName;
+            ActionData fallbackAction = fallbackComboSequence[currentComboIndex];
+            actionName = fallbackAction != null ? fallbackAction.actionName : "Unknown";
         }
         else
         {
@@ -355,7 +402,7 @@ public class RhythmComboController : MonoBehaviour
     
     /// <summary>
     /// Animate text feedback and destroy it
-    /// </summary>
+    /// /// </summary>
     private System.Collections.IEnumerator AnimateAndDestroyText(GameObject textObj)
     {
         RectTransform rectTransform = textObj.GetComponent<RectTransform>();

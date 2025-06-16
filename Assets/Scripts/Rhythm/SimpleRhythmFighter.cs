@@ -132,11 +132,26 @@ public class SimpleRhythmFighter : MonoBehaviour
                 else if (currentAttackMarker != null && !currentAttackMarker.wasOnBeat)
                 {
                     // Attack landed but wasn't on beat
-                    ResetCombo();
+                    
+                    // Only reset our internal combo if not using the RhythmComboController
+                    if (!useRhythmComboController)
+                    {
+                        ResetCombo();
+                    }
                     
                     // Tell the system we missed
                     OnMissedBeat?.Invoke();
                     OnRhythmMiss?.Invoke(); // Trigger the rhythm miss event for combo system
+                    
+                    // If using rhythm combo controller, let it handle its own miss logic
+                    if (useRhythmComboController)
+                    {
+                        RhythmComboController comboController = GetComponent<RhythmComboController>();
+                        if (comboController != null)
+                        {
+                            comboController.OnRhythmMissDetected();
+                        }
+                    }
                 }
             }
             

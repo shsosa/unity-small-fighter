@@ -448,7 +448,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   comboDefinition: {fileID: 11400000, guid: b565f87dece677e4aa885ca3b9bce839, type: 2}
-  rhythmComboActionName: Attack1
+  rhythmComboActionName: 
   comboTextSize: 1.5
   fallbackComboSequence: []
   missesToReset: 2
