@@ -30,6 +30,7 @@ public class SimpleRhythmFighter : MonoBehaviour
     public Color onBeatColor = Color.yellow;
     public float flashDuration = 0.1f;
     public TMPro.TextMeshProUGUI comboText; // UI text for combo display
+    public RhythmLaneUI rhythmLaneUI; // Reference to rhythm lane UI for note effects
     
     [Header("Combo System")]
     public bool useRhythmComboController = true;
@@ -189,11 +190,30 @@ public class SimpleRhythmFighter : MonoBehaviour
             Destroy(effect, 1.0f);
         }
         
+        // Trigger rhythm lane UI note effect
+        if (rhythmLaneUI != null)
+        {
+            rhythmLaneUI.TriggerHitEffectOnClosestNote(true); // Use true for perfect hit
+        }
+        else
+        {
+            // Try to find rhythm lane UI in scene if not assigned
+            RhythmLaneUI laneUI = FindObjectOfType<RhythmLaneUI>();
+            if (laneUI != null)
+            {
+                rhythmLaneUI = laneUI;
+                rhythmLaneUI.TriggerHitEffectOnClosestNote(true);
+            }
+        }
+        
         // Show the rhythm hit text
         ShowRhythmHitText();
         
         // Show debug message
         Debug.Log($"RHYTHM HIT! Combo x{comboCount}, Multiplier x{currentComboMultiplier:F1}");
+        
+        // Invoke the unity event for rhythm hit
+        OnRhythmHit?.Invoke();
     }
 
     private void ResetCombo()

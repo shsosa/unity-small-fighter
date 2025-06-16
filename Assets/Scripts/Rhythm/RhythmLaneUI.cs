@@ -358,16 +358,52 @@ public class RhythmLaneUI : MonoBehaviour
     private IEnumerator FadeOutAndDestroy(GameObject obj)
     {
         Image img = obj.GetComponent<Image>();
-        float duration = 0.2f;
+        if (img == null) {
+            Destroy(obj);
+            yield break;
+        }
+        
+        // Enhanced visual effect parameters
+        float popDuration = 0.15f;
+        float fadeDuration = 0.25f;
+        float totalDuration = popDuration + fadeDuration;
+        float maxScale = 1.8f;
         float elapsed = 0;
         Color startColor = img.color;
+        Color targetColor = new Color(startColor.r, startColor.g, startColor.b, 0);
+        Vector3 originalScale = obj.transform.localScale;
+        Vector3 popScale = originalScale * maxScale;
         
-        while (elapsed < duration)
+        // First phase: Pop up and brighten
+        while (elapsed < popDuration)
         {
             elapsed += Time.deltaTime;
-            float t = elapsed / duration;
-            img.color = new Color(startColor.r, startColor.g, startColor.b, Mathf.Lerp(1, 0, t));
-            obj.transform.localScale = Vector3.Lerp(Vector3.one, Vector3.one * 1.5f, t);
+            float t = elapsed / popDuration;
+            float smoothT = Mathf.SmoothStep(0, 1, t); // Smoother animation curve
+            
+            // Scale up
+            obj.transform.localScale = Vector3.Lerp(originalScale, popScale, smoothT);
+            
+            // Brighten color slightly
+            img.color = Color.Lerp(startColor, Color.white, smoothT * 0.5f);
+            
+            yield return null;
+        }
+        
+        // Second phase: Fade out while scaling slightly more
+        elapsed = 0;
+        while (elapsed < fadeDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / fadeDuration;
+            float smoothT = Mathf.SmoothStep(0, 1, t);
+            
+            // Fade out
+            img.color = Color.Lerp(Color.white, targetColor, smoothT);
+            
+            // Add a slight rotation for style
+            obj.transform.rotation = Quaternion.Euler(0, 0, smoothT * 45f);
+            
             yield return null;
         }
         
@@ -387,6 +423,61 @@ public class RhythmLaneUI : MonoBehaviour
             Color flashColor = perfectHit ? perfectNoteColor : normalNoteColor;
             StartCoroutine(FlashImage(hitZoneImage, flashColor));
         }
+    }
+    
+    /// <summary>
+    /// Triggers a hit effect on the note closest to the hit zone
+    /// Can be called by SimpleRhythmFighter when a rhythm hit is detected
+    /// </summary>
+    /// <param name="perfectHit">If true, applies a perfect hit effect</param>
+    /// <returns>True if a note was found to apply the effect to</returns>
+    public bool TriggerHitEffectOnClosestNote(bool perfectHit = true)
+    {
+        // Find the closest note to hit zone
+        float currentBeat = Time.time / secondsPerBeat;
+        float closestBeatDiff = float.MaxValue;
+        float closestBeat = 0;
+        bool noteFound = false;
+        
+        // Find the closest note to hit zone
+        foreach (var kvp in activeNotes)
+        {
+            float noteBeat = kvp.Key;
+            RectTransform noteRect = kvp.Value;
+            
+            if (noteRect == null) continue;
+            
+            float beatDiff = Mathf.Abs(noteBeat - currentBeat);
+            if (beatDiff < closestBeatDiff && beatDiff < 0.25f) // Within 1/4 beat window
+            {
+                closestBeatDiff = beatDiff;
+                closestBeat = noteBeat;
+                noteFound = true;
+            }
+        }
+        
+        if (noteFound && activeNotes.TryGetValue(closestBeat, out RectTransform hitNoteRect))
+        {
+            // Visual feedback for hit
+            Image noteImage = hitNoteRect.GetComponent<Image>();
+            if (noteImage != null)
+            {
+                noteImage.color = perfectHit ? perfectNoteColor : normalNoteColor;
+                
+                // Start enhanced fade out animation
+                StartCoroutine(FadeOutAndDestroy(hitNoteRect.gameObject));
+            }
+            
+            // Remove from active notes
+            activeNotes.Remove(closestBeat);
+            
+            // Also flash the hit zone
+            FlashHitZone(perfectHit);
+            
+            return true;
+        }
+        
+        return false;
     }
     
     private IEnumerator FlashImage(Image img, Color flashColor)

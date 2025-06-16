@@ -160,7 +160,7 @@ public class RhythmComboController : MonoBehaviour
         }
         
         // Visual feedback
-        ShowComboStatus();
+       // ShowComboStatus();
     }
     
 
